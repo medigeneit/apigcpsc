@@ -20,7 +20,7 @@ class CreateSchedulesTable extends Migration
             $table->string('time_schedule')->comment("Json encoding decoding");
             $table->string('slot_threshold')->nullable()->comment("Json encoding decoding Max slot, min threshold / mentor type");
             $table->string('mentors')->nullable()->comment("Json encoding decoding multiple mentors / mentor_type");
-            $table->boolean('actibe')->default(1);
+            $table->boolean('active')->default(1);
             $table->timestamps();
             $table->softDeletes();
 

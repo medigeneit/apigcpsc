@@ -118,8 +118,8 @@ class UserController extends Controller
     public function time(Request $request)
     {
 
-        return
-        Schedule::setValueOfTimeScheduleAttribute($request->time);
+        // return
+        // Schedule::setValueOfTimeScheduleAttribute($request->time);
 
 
         return [
