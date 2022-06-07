@@ -38,7 +38,8 @@ class AppointmentController extends Controller
                         // ->pluck('requested_mentor_id');
                     },
                     'appointments.patient',
-                    'appointments.requested_mentor'
+                    'appointments.requested_mentor',
+                    'appointments.assign_mentor.user:id,name'
                 ]);
             } else {
                 $schedule = $schedule->with(['appointments.patient', 'appointments.requested_mentor', 'appointments.assign_mentor.user:id,name']);
@@ -98,38 +99,42 @@ class AppointmentController extends Controller
                 'type' => $roles->pluck('name', 'id'),
                 'expected_mentors_frequescy' => $expected_mentors_frequescy,
                 'data' => LastAppointmentResource::collection($schedule->appointments),
+                'data2' => $schedule->appointments,
                 'mentors' =>   $roles->pluck('users','id')
             ];
         }
     }
 
-    public function my_appointments(Request $request)
+    public function my_profile(User $user)
     {
         //
         // $role = Role::where('type', 2)->get(['id', 'name']);
         // $mentors = [4]; // vobisshyat e dekha hobe
-        $user_id = $request->user_id;
+        // return
+        $user_id = $user->id;
         if ($user_id) {
             $last_appointment = Appointment::query()
                 ->with('schedule:id,chamber_id,date,time_schedule', 'mentor', 'user_feedbacks.question')
                 ->where('user_id', $user_id)
                 // ->whereIn('type', $mentors)
                 ->latest()
+                // ->hidden('created_at')
                 ->paginate();
         }
         return [
             // 'role' => $role,
+            'user'=> $user,
             'last_appointment' => $last_appointment,
         ];
 
 
-        $user_id = 2;
-        if ($user_id) {
-            return
-                Appointment::query()
-                ->where('user_id', $user_id)
-                ->get();
-        }
+        // $user_id = 2;
+        // if ($user_id) {
+        //     return
+        //         Appointment::query()
+        //         ->where('user_id', $user_id)
+        //         ->get();
+        // }
     }
 
     public function mentor_assign(Request $request)
@@ -200,19 +205,40 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        // return $request;
-        //
-        // $appointment = Appointment::crete()
-        // $user_id = 2;
+        // return json_encode($request->questions);
+        // return var_dump($request->questions[0]);
+        // //
+        // // $appointment = Appointment::crete()
+        // // $user_id = 2;
+        // return var_dump($request->questions);
         $missed_appointments_count = 0;
         // $user_id = $request->user_id;
+
+        if(!$request->user_id){
+            $user = User::create([
+                'phone'=>$request->phone,
+                'name'=>$request->name,
+            ]);
+            if($user){
+                $user_id = $user->id;
+            }
+            else{
+                return [
+                    'success' => false,
+                    'message' => "Sorry...!!!\nUser creation failed.",
+                    'appointment' => null
+                ];
+            }
+        }else{
+            $user_id = $request->user_id;
+        }
 
         $serial = count(Appointment::where('schedule_id', $request->schedule_id)->get()) + 1;
         $mentors = User::$payable_counselling_type; // vobisshyat e dekha hobe
         // return
         $last_appointments = Appointment::query()
             ->with('mentor')
-            ->where('user_id', $request->user_id)
+            ->where('user_id', $user_id)
             ->whereIn('type', $mentors)
             ->oldest()
             ->get();
@@ -235,14 +261,14 @@ class AppointmentController extends Controller
 
         // return
         $appointment = Appointment::create([
-            'user_id' => $request->user_id,
+            'user_id' => $user_id,
             'schedule_id' => $request->schedule_id,
             'serial' => $serial,
             'type' => $request->type,
-            'questions' => $request->questions,
+            // 'questions' => $request->questions,
             'payable' => $request->payable,
             'requested_mentor_id' => $request->requested_mentor_id  ?? null,
-            'questions' => json_encode($request->questions  ?? []),
+            'questions' =>$request->questions  ?? [],
         ]);
 
         if ($appointment) {
@@ -262,7 +288,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        //
+        return $appointment;
     }
 
     /**
@@ -327,7 +353,7 @@ class AppointmentController extends Controller
             'questions' => $request->questions,
             'payable' => $request->payable,
             'requested_mentor_id' => $request->requested_mentor_id  ?? null,
-            'questions' => json_encode($request->questions  ?? []),
+            // 'questions' => json_encode($request->questions  ?? []),
         ]);
 
         if ($appointment) {

@@ -115,18 +115,34 @@ class UserController extends Controller
 
     }
 
-    public function time(Request $request)
+    public function profile(User $user)
     {
 
-        // return
-        // Schedule::setValueOfTimeScheduleAttribute($request->time);
+        // return 341654;
+        return $user;
+
+    }
+    public function find_user(Request $request)
+    {
+
+        // return 341654;
+
+        $user = User::where('phone', $request->phone)->first();
+
+        if($user){
+            return [
+                'user'=>$user,
+                'success'=>true,
+            ];
+
+        }else{
+            return [
+                'user'=>$user,
+                'success'=>false,
+            ];
+
+        }
 
 
-        return [
-            time(),
-            date("d/m/Y", time()),
-            now(),
-            Carbon::now()
-        ];
     }
 }

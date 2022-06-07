@@ -28,7 +28,7 @@ class LastAppointmentResource extends JsonResource
             'requested_mentor_id' => $this->requested_mentor_id,
             'requested_mentor' => $this->requested_mentor->name ?? '',
             'assigned_mentor' => $this->assign_mentor->user ?? '',
-            'assigned_mentor_id' => $this->assign_mentor->id ?? '',
+            'assigned_mentor_id' => $this->assign_mentor->mentor_id ?? '',
             'patientName' => (string) ($this->patient->name ?? ''),
             'patientPhone' => (string) ($this->patient->Phone ?? ''),
             'patientEmail' => (string) ($this->patient->email ?? ''),

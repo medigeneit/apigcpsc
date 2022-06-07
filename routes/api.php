@@ -11,7 +11,6 @@ use App\Http\Controllers\RoleAssignController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Models\Schedule;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +31,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register'])
-    ->middleware('throttle:20,1,register');
+->middleware('throttle:20,1,register');
+
+Route::get('profile/{user}', [UserController::class, 'profile']);
 
 Route::resource('/schedules', ScheduleController::class);
 Route::get('/search-schedule/{support_type}', [ScheduleController::class, 'search_schedule']);
@@ -43,7 +44,7 @@ Route::get('/previous-history', [ScheduleController::class, 'prev_history']);
 
 Route::resource('/appointments', AppointmentController::class);
 
-Route::get('/my-appointments', [AppointmentController::class, 'my_appointments']);
+Route::get('/my-profile/{user}', [AppointmentController::class, 'my_profile']);
 
 Route::post('/mentor-assign', [AppointmentController::class, 'mentor_assign']);
 
@@ -58,3 +59,4 @@ Route::resource('mentor-assigns', MentorAssignController::class);
 
 Route::get('time', [UserController::class, 'time']);
 Route::get('mentors', [UserController::class, 'mentor_index']);
+Route::get('find-users', [UserController::class, 'find_user']);

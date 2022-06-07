@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Hamcrest\Arrays\IsArray;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -55,13 +56,23 @@ class Appointment extends Model
     }
     public function assign_mentor()
     {
-        return $this->hasOne(MentorAssign::class);
+        return $this->hasOne(MentorAssign::class,'appointment_id','id');
     }
 
 
     public function getQuestionsAttribute($value)
     {
         $questions = json_decode($value);
-        return $questions;
+
+        if (is_string($questions)) {
+            return [
+                 $questions
+            ];
+        }
+        return $questions ?? [];
+    }
+    public function setQuestionsAttribute($value)
+    {
+        $this->attributes['questions'] =  json_encode($value) ?? NULL;
     }
 }
