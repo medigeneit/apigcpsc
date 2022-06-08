@@ -99,7 +99,7 @@ class AppointmentController extends Controller
                 'type' => $roles->pluck('name', 'id'),
                 'expected_mentors_frequescy' => $expected_mentors_frequescy,
                 'data' => LastAppointmentResource::collection($schedule->appointments),
-                'data2' => $schedule->appointments,
+                // 'data2' => $schedule->appointments,
                 'mentors' =>   $roles->pluck('users','id')
             ];
         }
@@ -189,9 +189,11 @@ class AppointmentController extends Controller
     public function create()
     {
         //
+            $roles = Role::with('users')->where('type', 2)->get();
+
         return [
             'support_types' => Role::select('id', 'name')->where('type', 2)->get(),
-            'mentor' => User::get()
+            'mentor' => $roles->pluck('users','id')
         ];
         // $support_type = Role::select('id', 'name')->with('users')->where('type', 2)->get();
 
@@ -205,6 +207,7 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        // return mt_rand(111111,999999);
         // return json_encode($request->questions);
         // return var_dump($request->questions[0]);
         // //
@@ -218,6 +221,7 @@ class AppointmentController extends Controller
             $user = User::create([
                 'phone'=>$request->phone,
                 'name'=>$request->name,
+                // 'password'=> mt_rand(111111,999999),
             ]);
             if($user){
                 $user_id = $user->id;
@@ -299,10 +303,13 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment)
     {
+        $roles = Role::with('users')->where('type', 2)->get();
+
+        
         return [
             'appointment' => $appointment,
             'support_types' => Role::select('id', 'name')->where('type', 2)->get(),
-            'mentor' => User::get()
+            'mentor' => $roles->pluck('users','id')
         ];
     }
 
