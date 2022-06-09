@@ -122,6 +122,7 @@ class UserController extends Controller
         return $user;
 
     }
+    
     public function find_user(Request $request)
     {
 

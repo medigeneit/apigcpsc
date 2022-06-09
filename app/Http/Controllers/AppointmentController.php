@@ -100,7 +100,7 @@ class AppointmentController extends Controller
                 'expected_mentors_frequescy' => $expected_mentors_frequescy,
                 'data' => LastAppointmentResource::collection($schedule->appointments),
                 // 'data2' => $schedule->appointments,
-                'mentors' =>   $roles->pluck('users','id')
+                'mentors' =>   $roles->pluck('users', 'id')
             ];
         }
     }
@@ -114,7 +114,12 @@ class AppointmentController extends Controller
         $user_id = $user->id;
         if ($user_id) {
             $last_appointment = Appointment::query()
-                ->with('schedule:id,chamber_id,date,time_schedule', 'mentor', 'user_feedbacks.question')
+                ->with(
+                    'schedule:id,chamber_id,date,time_schedule',
+                    'schedule.chamber',
+                    'mentor',
+                    'user_feedbacks.question'
+                )
                 ->where('user_id', $user_id)
                 // ->whereIn('type', $mentors)
                 ->latest()
@@ -123,7 +128,8 @@ class AppointmentController extends Controller
         }
         return [
             // 'role' => $role,
-            'user'=> $user,
+            'types' =>Role::where('type', 2)->pluck('name','id'),
+            'user' => $user,
             'last_appointment' => $last_appointment,
         ];
 
@@ -141,13 +147,13 @@ class AppointmentController extends Controller
     {
 
         return
-        MentorAssign::withTrashed()->updateOrCreate([
-            'appointment_id' => $request->appointment_id,
-        ], [
-            'mentor_id' => $request->mentor_id,
-            'user_id' => $userId = Auth::id(),
-            'deleted_at' => NULL,
-        ]);
+            MentorAssign::withTrashed()->updateOrCreate([
+                'appointment_id' => $request->appointment_id,
+            ], [
+                'mentor_id' => $request->mentor_id,
+                'user_id' => $userId = Auth::id(),
+                'deleted_at' => NULL,
+            ]);
     }
 
     public function mentor_assign_edit(Request $request, $id)
@@ -189,11 +195,11 @@ class AppointmentController extends Controller
     public function create()
     {
         //
-            $roles = Role::with('users')->where('type', 2)->get();
+        $roles = Role::with('users')->where('type', 2)->get();
 
         return [
             'support_types' => Role::select('id', 'name')->where('type', 2)->get(),
-            'mentor' => $roles->pluck('users','id')
+            'mentor' => $roles->pluck('users', 'id')
         ];
         // $support_type = Role::select('id', 'name')->with('users')->where('type', 2)->get();
 
@@ -217,23 +223,22 @@ class AppointmentController extends Controller
         $missed_appointments_count = 0;
         // $user_id = $request->user_id;
 
-        if(!$request->user_id){
+        if (!$request->user_id) {
             $user = User::create([
-                'phone'=>$request->phone,
-                'name'=>$request->name,
+                'phone' => $request->phone,
+                'name' => $request->name,
                 // 'password'=> mt_rand(111111,999999),
             ]);
-            if($user){
+            if ($user) {
                 $user_id = $user->id;
-            }
-            else{
+            } else {
                 return [
                     'success' => false,
                     'message' => "Sorry...!!!\nUser creation failed.",
                     'appointment' => null
                 ];
             }
-        }else{
+        } else {
             $user_id = $request->user_id;
         }
 
@@ -272,7 +277,7 @@ class AppointmentController extends Controller
             // 'questions' => $request->questions,
             'payable' => $request->payable,
             'requested_mentor_id' => $request->requested_mentor_id  ?? null,
-            'questions' =>$request->questions  ?? [],
+            'questions' => $request->questions  ?? [],
         ]);
 
         if ($appointment) {
@@ -305,11 +310,11 @@ class AppointmentController extends Controller
     {
         $roles = Role::with('users')->where('type', 2)->get();
 
-        
+
         return [
             'appointment' => $appointment,
             'support_types' => Role::select('id', 'name')->where('type', 2)->get(),
-            'mentor' => $roles->pluck('users','id')
+            'mentor' => $roles->pluck('users', 'id')
         ];
     }
 
