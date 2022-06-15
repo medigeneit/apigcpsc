@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Otp;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -15,10 +16,24 @@ class Controller extends BaseController
     public function __construct()
     {
 
-        if( env('APP_DEBUG', false ) ) {
+        if (env('APP_DEBUG', false)) {
             DB::enableQueryLog();
-            
         }
+    }
 
+
+    protected function getOtp($code, $phone, $expire_time = 120)
+    {
+        // When the code expires, will be set null
+        // return
+        Otp::where('phone', $phone)
+            ->whereRaw('( NOW( ) - updated_at  > ' . $expire_time . ')')
+            ->update([
+                'code' => null
+            ]);
+
+        return Otp::select('code')
+            ->where('code', $code)
+            ->find($phone);
     }
 }

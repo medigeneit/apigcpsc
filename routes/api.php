@@ -29,9 +29,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('join', [AuthController::class, 'join']);
+//->middleware('throttle:50,1,join');
+Route::post('confirm', [AuthController::class, 'confirm']);
+
 Route::post('login', [AuthController::class, 'login']);
+Route::post('logout',  [AuthController::class, 'logout']);
+
+
 Route::post('register', [AuthController::class, 'register'])
-->middleware('throttle:20,1,register');
+    ->middleware('throttle:20,1,register');
+
+
+Route::post('check-user', [Auth\ResetPasswordController::class, 'checkUser']);
+//->middleware('throttle:1,2,check-user');
+
+// confirm otp
+//->middleware('throttle:6,1,confirm');
+
 
 Route::get('profile/{user}', [UserController::class, 'profile']);
 

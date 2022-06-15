@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
@@ -30,11 +31,13 @@ class RoleController extends Controller
 
     public function create()
     {
-        // return view('admin.roles.create', [
-        //     'role'          => new Role(),
-        //     'permissions'   => Permission::get(),
-        //     'assigns'       => [],
-        // ]);
+        return  [
+            'role'          => Role::pluck('name','id','type')
+            // 'permissions'   => Permission::get(),
+            // 'assigns'       => [],
+        ];
+
+
     }
 
     public function store(Request $request)

@@ -377,7 +377,7 @@ class ScheduleController extends Controller
     }
     public function search_schedule($support_type, Request $request)
     {
-        // return[ $request->chamber_id];
+        // return $support_type;
         $user_id = 2;
         $payable = 0;
         $missed_appointments_count = 0;

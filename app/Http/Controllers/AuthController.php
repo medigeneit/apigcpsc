@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -13,12 +15,15 @@ class AuthController extends Controller
     public function join(Request $request)
     {
 
+
+
         $fields = $request->validate([
             'phone'     => 'required|string'
         ]);
 
         // Check phone
         $user = User::where('phone', $fields['phone'])->first();
+
 
         if (!$user) {
             $code = rand(1111, 9999);
@@ -28,51 +33,80 @@ class AuthController extends Controller
                 ['code'  => $code,]
             );
 
-            $sms = new Sms();
+            // $sms = new Sms();
 
-            $text = "Your OTP code : {$code}";
+            // $text = "Your OTP code : {$code}";
 
-            $sms->setText($text)->setRecipient($fields['phone'])->send();
+            // $sms->setText($text)->setRecipient($fields['phone'])->send();
         }
 
         return response([
             'phone'     => $fields['phone'],
             'has_user'  => (bool) $user,
+            'code'  => $code ?? 0,
         ], 200);
     }
 
     public function confirm(Request $request)
     {
+        // return
         $fields = $request->validate([
             'phone'     => 'required|string',
             'code'      => 'required|size:4|regex:/^[0-9]+$/',
         ]);
-
-        $otp = $this->getOtp($fields['code'], $fields['phone']);
+        // return
+            $otp = $this->getOtp($fields['code'], $fields['phone']);
 
         if (!$otp) {
             return response([
                 'message'       => 'Otp expired or doesn\'t match',
                 'phone'         => $fields['phone'],
                 'otp_confirm'   => false,
+                'user_genesis'   => $user_genesis ?? null
             ], 404);
         }
+
+
+        // return
+        $response = Http::get('http://api.genesisedu.info/general/find-doc', [
+        // $response = Http::get('http://192.168.88.189:7000/general/find-doc', [
+            'phone' => $request->phone,
+            // 'demand ' => ['name','mobile_number',' ','main_password','gender','bmdc_no']
+        ]);
+        $user_genesis =  $response->object()->data ?? NULL;
+
+        // return
+        // $user_genesis->makeHidden(['photo',])
+
+
+
 
         return response([
             'message'       => 'Otp matched!',
             'phone'         => $fields['phone'],
             'otp_confirm'   => true,
+            'user_genesis'   => $user_genesis ?? null
         ], 200);
     }
 
     public function register(Request $request)
     {
+
+
+
+        // return 654654;
+
+
         // return  bcrypt($request->password);
+        // return
         $fields = $request->validate([
             'name'      => 'required|string',
             // 'phone'     => 'required|string',
             'phone'     => 'required|string|unique:users,phone',
+            'email'     => 'email|unique:users,email',
             'password'  => 'required|string|min:3',
+            'gender'  => '',
+            // 'bmdc'  => 'required|string',
             // 'code'      => 'required|size:4|regex:/^[0-9]+$/',
         ]);
 
@@ -92,6 +126,8 @@ class AuthController extends Controller
         $user = User::create([
             'name'      => $fields['name'],
             'phone'     => $fields['phone'],
+            'email'     => $fields['email'] ?? null,
+            'gender'  => $fields['gender'] ?? null,
             'password'  => $fields['password'],
             'hash_password'  => bcrypt($fields['password']),
         ]);
@@ -99,13 +135,23 @@ class AuthController extends Controller
         //Otp::find($fields['phone'])->delete();
 
         // $token = $user->createToken(Request()->ip())->plainTextToken;
-        if ($user) {
-            $user->success = true;
-            $user->message = 'Registration successfull!';
-        } else {
-            $user->success = false;
-            $user->message = 'Registration unsuccessfull!';
-        }
+
+
+        $token = $user->createToken(Request()->ip())->plainTextToken;
+        return response($user->setAndGetLoginResponse() +
+            [
+                'success'   => true,
+                'message'   => 'Registration successfull!',
+            ], 201);
+
+
+        // if ($user) {
+        //     $user->success = true;
+        //     $user->message = 'Registration successfull!';
+        // } else {
+        //     $user->success = false;
+        //     $user->message = 'Registration unsuccessfull!';
+        // }
 
         return response($user, 201);
     }
@@ -130,7 +176,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        return response($user, 201);
+        return response($user->setAndGetLoginResponse(), 201);
+
     }
 
 

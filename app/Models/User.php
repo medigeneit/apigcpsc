@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\AuthUserResource;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -53,11 +54,31 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function appointments(){
+    public function appointments()
+    {
         return $this->hasMany(Appointment::class);
     }
 
+    public function setAndGetLoginResponse($token = null, $additional = [])
+    {
+        AuthUserResource::withoutWrapping();
 
+        // $branches = Branch::query()->whereNotNull('domain')->pluck('domain' );
 
+        if ($token === null) {
+            $token = $this->loginAndGetToken();
+        }
 
+        return [
+            'user'  => (new AuthUserResource($this)),
+            'token' => $token,
+            'tokenHash' => base64_encode($token),
+            // 'branchDomains' => $branches,
+        ] + $additional;
+    }
+
+    public function loginAndGetToken()
+    {
+        return $this->createToken(request()->ip())->plainTextToken;
+    }
 }
