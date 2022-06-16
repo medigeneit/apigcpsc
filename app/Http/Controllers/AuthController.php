@@ -68,7 +68,7 @@ class AuthController extends Controller
 
 
         // return
-        $response = Http::get('http://api.genesisedu.info/general/find-doc', [
+        $response = Http::get('https://api.genesisedu.info/general/find-doc', [
         // $response = Http::get('http://192.168.88.189:7000/general/find-doc', [
             'phone' => $request->phone,
             // 'demand ' => ['name','mobile_number',' ','main_password','gender','bmdc_no']
