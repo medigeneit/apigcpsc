@@ -96,12 +96,14 @@ class UserController extends Controller
     public function mentor_index()
     {
         return
+        User::role('writer')->get();
         $roles = Role::with('users')->where('type', 2)->get();
-        return $roles[0]->users;
+        // return $roles[0]->users;
 
         $user = User::first();
 
-        return $user->getRoleNames();
+        // return $user->getRoleNames();
+        return
         Administration::join('users','users.id','=','administration.user_id')
         // ->where('users.id','administration.user_id')
         ->where('type',2)
@@ -145,4 +147,21 @@ class UserController extends Controller
 
 
     }
+
+    public function assigned_users()
+    {
+        return User::with('roles')->get();
+    }
+    public function role_assign( Request $request)
+    {
+        // return $request;
+        $user = User::find($request->user_id);
+        $user->assignRole($request->role);
+        return User::with('roles')->get();
+    }
+    // public function edit_role()
+    // {
+    //     $user->assignRole('writer');
+    //     return User::with('roles')->get();
+    // }
 }

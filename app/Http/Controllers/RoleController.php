@@ -13,7 +13,7 @@ class RoleController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('role:Owner|Administrator');
+        // $this->middleware('role:Owner|Super Admin');
     }
 
     public function index()
@@ -23,18 +23,19 @@ class RoleController extends Controller
         // }
         $roles = Role::query()
             ->where('name', '!=', 'Owner')
-            ->where('name', '!=', 'Administrator')
+            ->where('name', '!=', 'Super Admin')
             ->paginate(request()->perpage);
 
-        return view('admin.roles.data', compact('roles'));
+        return compact('roles');
     }
 
     public function create()
     {
         return  [
-            'role'          => Role::pluck('name','id','type')
+            'role'          => Role::pluck('name','id'),
+            'permissions'   => Permission::pluck('name','id'),
             // 'permissions'   => Permission::get(),
-            // 'assigns'       => [],
+            'types'       => Role::$TYPES,
         ];
 
 
@@ -46,36 +47,37 @@ class RoleController extends Controller
 
         $role->syncPermissions($request->permission);
 
-        return redirect()
-            ->route('admin.roles.show', $role->id)
-            ->with('status', 'The record has been successfully created');
+        return $this->index();
+            // ->with('status', 'The record has been successfully created');
     }
 
     public function show(Role $role)
     {
-        if (in_array($role->name, ['Owner', 'Administrator'])) {
+        if (in_array($role->name, ['Owner', 'Super Admin'])) {
             return abort(404);
         }
-
-        return view('admin.roles.show', compact('role'));
+        $role->load('permissions');
+        return  compact('role');
     }
 
     public function edit(Role $role)
     {
-        if (in_array($role->name, ['Owner', 'Administrator'])) {
+        if (in_array($role->name, ['Owner', 'Super Admin'])) {
             return abort(404);
         }
 
-        return view('admin.roles.edit', [
-            'role'          => $role,
-            'permissions'   => Permission::get(),
-            'assigns'       => $role->permissions->pluck('id')->toArray(),
-        ]);
+        // $assigns = ;
+        return  [
+            'assigns'       =>  $role->permissions->pluck('id')->toArray(),
+            'role'          => $role->unsetRelation('permissions'),
+            'permissions'   => Permission::pluck('name','id'),
+            'types'       => Role::$TYPES,
+        ];
     }
 
     public function update(Request $request, Role $role)
     {
-        if (in_array($role->name, ['Owner', 'Administrator'])) {
+        if (in_array($role->name, ['Owner', 'Super Admin'])) {
             return abort(404);
         }
 
@@ -83,22 +85,18 @@ class RoleController extends Controller
 
         $role->syncPermissions($request->permission);
 
-        return redirect()
-            ->route('admin.roles.show', $role->id)
-            ->with('status', 'The record has been successfully updated');
+        return $this->index();
     }
 
     public function destroy(Role $role)
     {
-        if (in_array($role->name, ['Owner', 'Administrator'])) {
+        if (in_array($role->name, ['Owner', 'Super Admin'])) {
             return abort(404);
         }
 
-        // return $role->delete();
+        return $role->delete();
 
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('status', 'The record has been successfully trashed');
+        return $this->index();
     }
 
     private function validation($request, $id = '')
@@ -110,6 +108,7 @@ class RoleController extends Controller
                 Rule::unique(Role::class, 'name')
                     ->ignore($id),
             ],
+            'type' => "required"
         ]);
     }
 }

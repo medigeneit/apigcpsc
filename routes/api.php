@@ -59,6 +59,9 @@ Route::get('/previous-history', [ScheduleController::class, 'prev_history']);
 
 Route::resource('/appointments', AppointmentController::class);
 
+
+// Route::resource('/appointments', AppointmentController::class);
+
 Route::get('/my-profile/{user}', [AppointmentController::class, 'my_profile']);
 
 Route::post('/mentor-assign', [AppointmentController::class, 'mentor_assign']);
@@ -70,7 +73,9 @@ Route::resource('/feedback', FeedbackController::class);
 
 Route::resource('chambers', ChamberController::class);
 Route::resource('roles', RoleController::class);
-Route::resource('mentor-assigns', MentorAssignController::class);
+Route::get('assigned-users', [UserController::class, 'assigned_users']);
+Route::post('role-assign', [UserController::class, 'role_assign']);
+// Route::resource('mentor-assigns', MentorAssignController::class);
 
 Route::get('time', [UserController::class, 'time']);
 Route::get('mentors', [UserController::class, 'mentor_index']);
