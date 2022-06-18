@@ -42,8 +42,9 @@ class AuthController extends Controller
 
         return response([
             'phone'     => $fields['phone'],
+            'name'      => $user->name ?? '',
             'has_user'  => (bool) $user,
-            'code'  => $code ?? 0,
+            'code'      => $code ?? 0,
         ], 200);
     }
 
@@ -68,7 +69,7 @@ class AuthController extends Controller
 
 
         // return
-        $response = Http::get('http://api.genesisedu.info/general/find-doc', [
+        $response = Http::get('https://api.genesisedu.info/general/find-doc', [
         // $response = Http::get('http://192.168.88.189:7000/general/find-doc', [
             'phone' => $request->phone,
             // 'demand ' => ['name','mobile_number',' ','main_password','gender','bmdc_no']
@@ -103,10 +104,10 @@ class AuthController extends Controller
             'name'      => 'required|string',
             // 'phone'     => 'required|string',
             'phone'     => 'required|string|unique:users,phone',
-            'email'     => 'email|unique:users,email',
+            'email'     => 'nullable|email|unique:users,email',
             'password'  => 'required|string|min:3',
             'gender'  => '',
-            // 'bmdc'  => 'required|string',
+            'bmdc'  => '',
             // 'code'      => 'required|size:4|regex:/^[0-9]+$/',
         ]);
 
@@ -126,6 +127,7 @@ class AuthController extends Controller
         $user = User::create([
             'name'      => $fields['name'],
             'phone'     => $fields['phone'],
+            'bmdc'     => $fields['bmdc'],
             'email'     => $fields['email'] ?? null,
             'gender'  => $fields['gender'] ?? null,
             'password'  => $fields['password'],
@@ -182,16 +184,16 @@ class AuthController extends Controller
 
 
 
-    private function loginResource(User $user, $token): array
-    {
-        AuthUserResource::withoutWrapping();
+    // private function loginResource(User $user, $token): array
+    // {
+    //     AuthUserResource::withoutWrapping();
 
-        return [
-            'user'  => new AuthUserResource($user),
-            'token' => $token,
-            'tokenHash' => base64_encode($token),
-        ];
-    }
+    //     return [
+    //         'user'  => new AuthUserResource($user),
+    //         'token' => $token,
+    //         'tokenHash' => base64_encode($token),
+    //     ];
+    // }
 
     public function user()
     {
