@@ -397,21 +397,22 @@ class ScheduleController extends Controller
         $missed_appointments_count = 0;
         $mentors = User::$payable_counselling_type; // vobisshyat e dekha hobe
 
-        if( $user_id)
-        {$last_appointments = Appointment::query()
-            ->with('mentor')
-            ->where('user_id', $user_id)
-            ->whereIn('type', $mentors)
-            ->oldest()
-            ->get();
+        if ($user_id) {
+            $last_appointments = Appointment::query()
+                ->with('mentor')
+                ->where('user_id', $user_id)
+                ->whereIn('type', $mentors)
+                ->oldest()
+                ->get();
 
-        foreach ($last_appointments as $appointment) {
-            if ($appointment->mentor) {
-                $payable += 1;
-                $missed_appointments_count = 0;
-            } else
-                $missed_appointments_count++;
-        }}
+            foreach ($last_appointments as $appointment) {
+                if ($appointment->mentor) {
+                    $payable += 1;
+                    $missed_appointments_count = 0;
+                } else
+                    $missed_appointments_count++;
+            }
+        }
 
 
 
@@ -558,9 +559,9 @@ class ScheduleController extends Controller
         // $user_id = $request->user_id;
         // return $request->user();
         // return
-    //    [ Auth::guard('sanctum')->id() ];
+        //    [ Auth::guard('sanctum')->id() ];
 
-        $user_id = Auth::guard('sanctum')->id()  ;
+        $user_id = Auth::guard('sanctum')->id();
         // $user_id = Auth::guard('sanctum')->id()  ;
         if ($user_id) {
             $last_appointment = Appointment::query()
@@ -592,10 +593,16 @@ class ScheduleController extends Controller
         $chembers = Chamber::get(['id', 'name', 'address']);
 
         $schedules = Schedule::query()
-            ->with('appointments:id,schedule_id')
+            ->with([
+                'appointments:id,schedule_id',
+                'appointments.mentor' => function ($q) use ($mentor) {
+                    $q->where('mentor_id', $mentor->id);
+                }
+            ])
             ->when($chamber_id, function ($query, $chamber_id) {
                 return $query->where('chamber_id', $chamber_id);
             });
+            return $schedules->get();
 
         // if ($request->counselling_type) {
         //     $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
