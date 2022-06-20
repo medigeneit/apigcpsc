@@ -14,12 +14,25 @@ use GuzzleHttp\Psr7\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Auth;
 use phpDocumentor\Reflection\Types\Boolean;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class ScheduleController extends Controller
 {
+
+
+    // public function __construct()
+    // {
+    //     $this->middleware('can:Schedule List')->only('index', 'show');
+    //     $this->middleware('can:Schedule Create')->only('create', 'store');
+    //     $this->middleware('can:Schedule Edit')->only('edit', 'update');
+    //     $this->middleware('can:Schedule Download')->only('exportExcel');
+    //     // $this->middleware('can:Schedule Delete')->only('destroy');
+    // }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -378,11 +391,14 @@ class ScheduleController extends Controller
     public function search_schedule($support_type, Request $request)
     {
         // return $support_type;
-        $user_id = 2;
+        // return
+        $user_id = $request->user()->id ?? NULL;
         $payable = 0;
         $missed_appointments_count = 0;
         $mentors = User::$payable_counselling_type; // vobisshyat e dekha hobe
-        $last_appointments = Appointment::query()
+
+        if( $user_id)
+        {$last_appointments = Appointment::query()
             ->with('mentor')
             ->where('user_id', $user_id)
             ->whereIn('type', $mentors)
@@ -395,7 +411,7 @@ class ScheduleController extends Controller
                 $missed_appointments_count = 0;
             } else
                 $missed_appointments_count++;
-        }
+        }}
 
 
 
@@ -540,7 +556,12 @@ class ScheduleController extends Controller
         $role = Role::where('type', 2)->get(['id', 'name']);
         $mentors = [4]; // vobisshyat e dekha hobe
         // $user_id = $request->user_id;
-        $user_id = 2;
+        // return $request->user();
+        // return
+    //    [ Auth::guard('sanctum')->id() ];
+
+        $user_id = Auth::guard('sanctum')->id()  ;
+        // $user_id = Auth::guard('sanctum')->id()  ;
         if ($user_id) {
             $last_appointment = Appointment::query()
                 ->with('schedule:id,chamber_id,date,time_schedule', 'schedule.chamber', 'mentor', 'user_feedbacks.question')
@@ -551,13 +572,15 @@ class ScheduleController extends Controller
         }
         return [
             'support_types' => $role,
-            'last_appointment' => $last_appointment,
+            'last_appointment' => $last_appointment ?? null,
         ];
     }
 
     public function mentor_schedule(Request $request)
     {
-        $user_id = 2;
+        // $user_id = 2;
+        $user_id = $request->user()->id ?? NULL;
+
 
         $chamber_id = $request->chamber_id;
 
@@ -574,6 +597,16 @@ class ScheduleController extends Controller
                 return $query->where('chamber_id', $chamber_id);
             });
 
+        // if ($request->counselling_type) {
+        //     $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
+        // } else {
+        //     $schedules->where(function ($query) use ($mentor) {
+        //         foreach ($mentor->roles as $role) {
+        //             $query->orWhereJsoncontains('mentors->' . (int)$role->id, (int)($mentor->id));
+        //         }
+        //         return $query;
+        //     });
+        // }
         if ($request->counselling_type) {
             $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
         } else {

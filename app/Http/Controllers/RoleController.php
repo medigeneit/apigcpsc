@@ -24,7 +24,8 @@ class RoleController extends Controller
         $roles = Role::query()
             ->where('name', '!=', 'Owner')
             ->where('name', '!=', 'Super Admin')
-            ->paginate(request()->perpage);
+            ->get();
+            // ->paginate(request()->perpage);
 
         return compact('roles');
     }

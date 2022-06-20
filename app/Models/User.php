@@ -69,10 +69,27 @@ class User extends Authenticatable
             $token = $this->loginAndGetToken();
         }
 
+        $roles = $this->roles()->get();
+        $role_names = $this->roles()->pluck('name')->toArray();
+        // return
+        $roel_types = $roles->pluck('type')->toArray();
+
+        foreach (Role::$TYPES as $key =>$type){
+            $access['is'.$type] = in_array($key, $roel_types) ? 1 : 0;
+        }
+
+
+        if(in_array('Owner', $role_names) ||  in_array('Super Admin',$role_names)){
+            $permissions = ['*'];
+        }else{
+            $permissions = $this->getAllPermissions()->pluck('name');
+        }
         return [
             'user'  => (new AuthUserResource($this)),
             'token' => $token,
             'tokenHash' => base64_encode($token),
+            'access' => $access ?? [],
+            'abilities' => $permissions,
             // 'branchDomains' => $branches,
         ] + $additional;
     }

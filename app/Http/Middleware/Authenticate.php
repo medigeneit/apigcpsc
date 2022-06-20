@@ -18,4 +18,29 @@ class Authenticate extends Middleware
             return route('login');
         }
     }
+
+
+    protected function authenticate($request, array $guards)
+    {
+        if (empty($guards)) {
+            $guards = [null];
+        }
+
+        $first_guard = $guards[0] ?? '';
+
+        if ($ignore_unauthenticated = ($first_guard == 'sanctum.ignore-unauthenticated')) {
+            $guards[0] = 'sanctum';
+        }
+
+        foreach ($guards as $guard) {
+            if ($this->auth->guard($guard)->check()) {
+                return $this->auth->shouldUse($guard);
+            }
+        }
+
+        if (!$ignore_unauthenticated) {
+            $this->unauthenticated($request, $guards);
+        }
+    }
+
 }

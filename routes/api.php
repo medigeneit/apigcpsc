@@ -51,11 +51,17 @@ Route::post('check-user', [Auth\ResetPasswordController::class, 'checkUser']);
 Route::get('profile/{user}', [UserController::class, 'profile']);
 
 Route::resource('/schedules', ScheduleController::class);
-Route::get('/search-schedule/{support_type}', [ScheduleController::class, 'search_schedule']);
-Route::get('/mentor-schedule', [ScheduleController::class, 'mentor_schedule']);
 // Route::get('/search-schedule-demo/{support_type}',[ScheduleController::class,'search_schedule']);
 
-Route::get('/previous-history', [ScheduleController::class, 'prev_history']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/mentor-schedule', [ScheduleController::class, 'mentor_schedule']);
+
+});
+Route::middleware('auth:sanctum.ignore-unauthenticated')->group(function () {
+    Route::get('/search-schedule/{support_type}', [ScheduleController::class, 'search_schedule']);
+
+    Route::get('/previous-history', [ScheduleController::class, 'prev_history']);
+});
 
 Route::resource('/appointments', AppointmentController::class);
 
@@ -72,9 +78,15 @@ Route::resource('/feedback-questions', FeedbackQuestionController::class);
 Route::resource('/feedback', FeedbackController::class);
 
 Route::resource('chambers', ChamberController::class);
+
+#Roll management
 Route::resource('roles', RoleController::class);
 Route::get('assigned-users', [UserController::class, 'assigned_users']);
+Route::get('assigned-user/{user}', [UserController::class, 'user_role']);
 Route::post('role-assign', [UserController::class, 'role_assign']);
+Route::get('role-assign-edit/{user}', [UserController::class, 'role_assign_edit']);
+Route::delete('role-assign/{user}', [UserController::class, 'role_assign_delete']);
+
 // Route::resource('mentor-assigns', MentorAssignController::class);
 
 Route::get('time', [UserController::class, 'time']);
