@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\LastAppointmentResource;
 use App\Models\Appointment;
 use App\Models\MentorAssign;
+use App\Models\Role;
 use App\Models\Schedule;
 use App\Models\User;
 use GrahamCampbell\ResultType\Success;
@@ -12,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\CommonMark\Extension\Mention\Mention;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class AppointmentController extends Controller
 {
@@ -21,42 +21,50 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, $mentor = false)
     {
         // return Schedule::with('appointments.assign_mentor.user:id,name')->get();
+
+        // return
+        $user = $request->user()->id;
+
 
         $support_type = $request->type;
 
         if ($request->schedule_id) {
+
             $schedule = Schedule::query();
 
-            if ($support_type) {
-                $schedule = $schedule->with([
-                    'appointments' => function ($q) use ($support_type) {
+            // if ($support_type) {
+            $schedule = $schedule->with([
+                'appointments' => function ($q) use ($support_type, $mentor, $user) {
+                    $q->when($support_type, function ($q) use ($support_type) {
                         $q->where('type', $support_type);
-                        // ->coune();
-                        // ->pluck('requested_mentor_id');
-                    },
-                    'appointments.patient',
-                    'appointments.requested_mentor',
-                    'appointments.assign_mentor.user:id,name'
-                ]);
-            } else {
-                $schedule = $schedule->with(['appointments.patient', 'appointments.requested_mentor', 'appointments.assign_mentor.user:id,name']);
-            }
-
+                    })->when($mentor == true, function ($q) use ($user) {
+                        $q->whereHas('assign_mentor', function ($q) use ($user) {
+                            $q->where('mentor_id', $user);
+                        });
+                    });
+                    // ->coune();
+                    // ->pluck('requested_mentor_id');
+                },
+                'appointments.patient',
+                'appointments.requested_mentor',
+                'appointments.assign_mentor.user:id,name'
+            ]);
+            // }
+            // else {
+            //     $schedule = $schedule->with(['appointments.patient', 'appointments.requested_mentor', 'appointments.assign_mentor.user:id,name']);
+            // }
+            // return
             $schedule = $schedule->where('id', $request->schedule_id)
                 ->first();
-
 
 
             // return $schedule->appointments->whereNotNull('requested_mentor_id');
 
             $grouped = $schedule->appointments->whereNotNull('requested_mentor_id')->groupBy('requested_mentor_id')->map(function ($row) {
-
-
                 if (!isset($row[0]->requested_mentor)) {
-
                     return [
                         "id" => NULL,
                         "name"  =>  "",
@@ -82,7 +90,9 @@ class AppointmentController extends Controller
             $expected_mentors_frequescy = $grouped->sortByDesc('frequency')->sortBy('name')->whereNotNull('id')->values();
 
             // return
+            // return
             $roles = Role::with('users')->where('type', 2)->get();
+            // $roles = Role::with('users')->where('type', 2)->get();
             // return $roles->pluck('users','id');
             // return $roles->pluck('name', 'id');
 
@@ -105,13 +115,22 @@ class AppointmentController extends Controller
         }
     }
 
-    public function my_profile(User $user)
+    public function mentor_appointment(Request $request)
     {
+        $index = $this->index($request, true);
+        $data['type'] = $index['type'];
+        $data['appointments'] = $index['data'];
+        return  $data;
+    }
+
+    public function my_profile()
+    {
+        // return request()->user()->id;
         //
         // $role = Role::where('type', 2)->get(['id', 'name']);
         // $mentors = [4]; // vobisshyat e dekha hobe
         // return
-        $user_id = $user->id;
+        $user_id = request()->user()->id;
         if ($user_id) {
             $last_appointment = Appointment::query()
                 ->with(
@@ -128,8 +147,8 @@ class AppointmentController extends Controller
         }
         return [
             // 'role' => $role,
-            'types' =>Role::where('type', 2)->pluck('name','id'),
-            'user' => $user,
+            'types' => Role::where('type', 2)->pluck('name', 'id'),
+            'user' => request()->user(),
             'last_appointment' => $last_appointment,
         ];
 
@@ -213,21 +232,13 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        // return mt_rand(111111,999999);
-        // return json_encode($request->questions);
-        // return var_dump($request->questions[0]);
-        // //
-        // // $appointment = Appointment::crete()
-        // // $user_id = 2;
-        // return var_dump($request->questions);
+
         $missed_appointments_count = 0;
-        // $user_id = $request->user_id;
 
         if (!$request->user_id) {
             $user = User::create([
                 'phone' => $request->phone,
                 'name' => $request->name,
-                // 'password'=> mt_rand(111111,999999),
             ]);
             if ($user) {
                 $user_id = $user->id;
@@ -297,7 +308,12 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        return $appointment;
+         $appointment->load('schedule','assign_mentor.user:id,name,phone,email');
+         LastAppointmentResource::$types =  Role::where('type', 2)->pluck('name', 'id');
+         $appointment_data['schedule'] = $appointment->schedule;
+         $appointment_data['appointment'] = new LastAppointmentResource($appointment);
+        //  return
+         return $appointment_data;
     }
 
     /**

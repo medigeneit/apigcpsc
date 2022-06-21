@@ -49,7 +49,12 @@ class AssignRoleSeeder extends Seeder
             ];
             $user = User::create($data);
             $user ->assignRole('Super Admin');
+        }else{
+            $user = User::were('phone','00000000000')->first()->assignRole('Super Admin');
         }
+
+
+
         if (!in_array('99999999999', $suprims)) {
             $data = [
                 'name' => 'Owner (Developers)',
@@ -59,6 +64,8 @@ class AssignRoleSeeder extends Seeder
             ];
             $user = User::create($data);
             $user ->assignRole('Owner');
+        }else{
+            $user = User::were('phone','99999999999')->first()->assignRole('Super Admin');
         }
     }
 }

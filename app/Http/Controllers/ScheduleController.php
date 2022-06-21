@@ -589,20 +589,43 @@ class ScheduleController extends Controller
 
         User::where('id', 2)->first()->getRoleNames();
 
+        $support_types = Role::query()
+            // ->with('users')
+            ->where('type', 2)
+            // ->get();
+            ->pluck('name', 'id');
         // return
         $chembers = Chamber::get(['id', 'name', 'address']);
 
+        // return 313;
         $schedules = Schedule::query()
             ->with([
-                'appointments:id,schedule_id',
-                'appointments.mentor' => function ($q) use ($mentor) {
-                    $q->where('mentor_id', $mentor->id);
+                'appointments' => function ($q) use ($mentor, $request) {
+                    $q->when($request->support_type, function ($q) use ($request) {
+                        $q->where('type', $request->support_type);
+                    })
+                        ->whereHas('assign_mentor', function ($q) use ($mentor) {
+                            $q->where('mentor_id', $mentor->id);
+                        });
                 }
             ])
+            ->whereHas(
+                'appointments',
+                function ($q) use ($mentor, $request) {
+                    $q->when($request->support_type, function ($q) use ($request) {
+                        $q->where('type', $request->support_type);
+                    })
+                        ->whereHas('assign_mentor', function ($q) use ($mentor) {
+                            $q->where('mentor_id', $mentor->id);
+                        });
+                }
+            )
             ->when($chamber_id, function ($query, $chamber_id) {
                 return $query->where('chamber_id', $chamber_id);
             });
-            return $schedules->get();
+
+
+        // return $schedules->get();
 
         // if ($request->counselling_type) {
         //     $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
@@ -614,75 +637,32 @@ class ScheduleController extends Controller
         //         return $query;
         //     });
         // }
-        if ($request->counselling_type) {
-            $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
-        } else {
-            $schedules->where(function ($query) use ($mentor) {
-                foreach ($mentor->roles as $role) {
-                    $query->orWhereJsoncontains('mentors->' . (int)$role->id, (int)($mentor->id));
-                }
-                return $query;
-            });
-        }
+
+        // if ($request->counselling_type) {
+        //     $schedules = $schedules->WhereJsoncontains('mentors->' . (int)$request->counselling_type, (int)($mentor->id));
+        // } else {
+        //     $schedules->where(function ($query) use ($mentor) {
+        //         foreach ($mentor->roles as $role) {
+        //             $query->orWhereJsoncontains('mentors->' . (int)$role->id, (int)($mentor->id));
+        //         }
+        //         return $query;
+        //     });
+        // }
         // return
         $schedules = $schedules->orderBy('date', 'desc')
             ->take(20)
-            ->get(['id', 'chamber_id', 'date', 'time_schedule', 'slot_threshold', 'mentors']);
+            ->get();
+        // ->get(['id', 'chamber_id', 'date', 'time_schedule', 'slot_threshold',]);
 
         mentorScheduleResource::$chembers = $chembers;
         mentorScheduleResource::$mentor_id = $user_id;
 
+
         return [
-            // 'support_types' => $support_types,
+            'support_types' => $support_types,
+            'chembers' => $chembers,
             'schedules' => mentorScheduleResource::collection($schedules),
             'query_log' => DB::getQueryLog()
         ];
-    }
-
-
-    public function mentor_with_relation(Type $var = null)
-    {
-        // $mentorIds = [];
-
-        // $schedules->each(function (Schedule $schedule) use (&$mentorIds) {
-        //     foreach ((array) $schedule->mentors as $mentorList) {
-        //         $mentorIds = array_merge($mentorIds, $mentorList);
-        //     }
-        // });
-
-        // $mentorIds = array_unique($mentorIds);
-
-        // $mentors  = User::whereIn('id', $mentorIds)->get();
-
-        // return
-
-        //     $schedules->map(function (Schedule $schedule) use ($mentors) {
-
-        //         // $schedule->mentors = json_decode($schedule->mentors);
-
-        //         $mentorListGroup = [];
-
-        //         foreach ((array) $schedule->mentors as $type => $ids) {
-        //             $mentorListGroup[] = [
-        //                 'type' => $type,
-        //                 'mentors' => $mentors->filter(function ($mentor) use ($ids) {
-        //                     return in_array($mentor->id, $ids);
-        //                 })
-        //             ];
-        //         }
-
-        //         $schedule->mentorListGroup = $mentorListGroup;
-
-        //         // $schedule->mentorList = $mentors->filter(function ($mentor) use ($ids) {
-        //         //     return in_array($mentor->id, $ids);
-        //         // });
-
-        //         return $schedule;
-        //     });
-
-    }
-
-    public function mentor_appointments(Type $var = null)
-    {
     }
 }

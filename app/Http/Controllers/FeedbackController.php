@@ -53,7 +53,7 @@ class FeedbackController extends Controller
         {
             $mentors [] = $type;
         }
-        $user_id = 2 ;
+        $user_id = $request->user()->id;
 
         if (in_array($user_id, Arr::collapse($mentors))) {
 

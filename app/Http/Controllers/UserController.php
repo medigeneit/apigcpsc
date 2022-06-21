@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Administration;
 use App\Models\Schedule;
 use App\Models\User;
 use Carbon\Carbon;
@@ -93,37 +92,9 @@ class UserController extends Controller
 
 
 
-    public function mentor_index()
-    {
-        return
-        User::role('writer')->get();
-        $roles = Role::with('users')->where('type', 2)->get();
-        // return $roles[0]->users;
 
-        $user = User::first();
 
-        // return $user->getRoleNames();
-        return
-        Administration::join('users','users.id','=','administration.user_id')
-        // ->where('users.id','administration.user_id')
-        ->where('type',2)
-        ->orwhe9re('type',3)
-        ->select('users.*')
-        ->get();
-
-        // $sql = "SELECT u.* FROM administration as ad join users as u on ad.user_id=u.id where ad.type = 2 or ad.type = 3";
-        // return
-        // DB::select($sql);
-
-    }
-
-    public function profile(User $user)
-    {
-
-        // return 341654;
-        return $user;
-
-    }
+    
     public function find_user(Request $request)
     {
 

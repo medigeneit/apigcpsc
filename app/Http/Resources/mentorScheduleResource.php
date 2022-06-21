@@ -14,6 +14,7 @@ class mentorScheduleResource extends JsonResource
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
 
+    // static $mentor_types = null;
     static $chembers = null;
     static $mentor_id = 0;
 
@@ -31,14 +32,25 @@ class mentorScheduleResource extends JsonResource
                 $data['chamber_address'] = $chember->address ?? '';
             }
         }
-        foreach ($this->mentors as $type => $mentors) {
-            if (in_array((self::$mentor_id), $mentors)) {
+        // foreach ($this->mentors as $type => $mentors) {
+        //     if (in_array((self::$mentor_id), $mentors)) {
 
-                $data['type'] = (int)($type ?? 0);
-            }
-        }
+        //         $data['type'] = (int)($type ?? 0);
+        //     }
+        // }
+
+
+        $appount_types =  $this->appointments->groupBy('type');
+
+        $data['total_appointments'] =  $appount_types->map(function($appointment){
+            $collection = $appointment->count('type');
+
+
+            return $collection;
+        });
+        // $data['type'] = $this->appointments->groupBy('type');
         $data['time_schedule'] = $this->time_schedule ?? null;
-        $data['total_appointments'] = count($this->appointments) ?? 0;
+        // $data['total_appointments'] = count($this->appointments) ?? 0;
 
         return $data;
     }

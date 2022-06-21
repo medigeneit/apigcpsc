@@ -3,11 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;
+use Spatie\Permission\PermissionRegistrar;
 
 class Role extends SpatieRole
 {
     use HasFactory;
+
+
+    public function __construct()
+    {
+        parent::__construct(['guard_name' => 'web']);
+    }
+
 
     protected $appends = ['type_name'];
 
@@ -18,7 +27,7 @@ class Role extends SpatieRole
 
     public function getTypeNameAttribute()
     {
-        if($this->type)
-        return self::$TYPES[$this->type];
+        if ($this->type)
+            return self::$TYPES[$this->type];
     }
 }

@@ -23,10 +23,14 @@ class RoleController extends Controller
         //     return view('admin.roles.index');
         // }
         $roles = Role::query()
+            ->with('users')
             ->where('name', '!=', 'Owner')
             ->where('name', '!=', 'Super Admin')
             ->get();
-            // ->paginate(request()->perpage);
+        // ->paginate(request()->perpage);
+
+
+        // dd($roles);
 
         return compact('roles');
     }
@@ -34,13 +38,11 @@ class RoleController extends Controller
     public function create()
     {
         return  [
-            'role'          => Role::pluck('name','id'),
-            'permissions'   => Permission::pluck('name','id'),
+            'role'          => Role::pluck('name', 'id'),
+            'permissions'   => Permission::pluck('name', 'id'),
             // 'permissions'   => Permission::get(),
             'types'       => Role::$TYPES,
         ];
-
-
     }
 
     public function store(Request $request)
@@ -50,7 +52,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->permission);
 
         return $this->index();
-            // ->with('status', 'The record has been successfully created');
+        // ->with('status', 'The record has been successfully created');
     }
 
     public function show(Role $role)
@@ -72,7 +74,7 @@ class RoleController extends Controller
         return  [
             'assigns'       =>  $role->permissions->pluck('id')->toArray(),
             'role'          => $role->unsetRelation('permissions'),
-            'permissions'   => Permission::pluck('name','id'),
+            'permissions'   => Permission::pluck('name', 'id'),
             'types'       => Role::$TYPES,
         ];
     }
