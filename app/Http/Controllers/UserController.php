@@ -94,7 +94,7 @@ class UserController extends Controller
 
 
 
-    
+
     public function find_user(Request $request)
     {
 
@@ -143,6 +143,13 @@ class UserController extends Controller
         // return $request;
         $user = User::find($request->user_id);
         $user->assignRole($request->role);
+        return $this->assigned_users();
+    }
+    public function role_assign_update( Request $request)
+    {
+        // return $request;
+        $user = User::find($request->user_id);
+        $user->syncRoles($request->role);
         return $this->assigned_users();
     }
     public function role_assign_edit( User $user)
