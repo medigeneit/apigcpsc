@@ -34,8 +34,7 @@ class AssignRoleSeeder extends Seeder
 
         if (count($roles))
             foreach ($roles as $role) {
-                # code...
-                Role::create($role);
+                Role::insert($role);
             }
 
 
