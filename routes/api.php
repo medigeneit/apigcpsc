@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('assigned-users', [UserController::class, 'assigned_users']);
         Route::get('assigned-user/{user}', [UserController::class, 'user_role']);
         Route::post('role-assign', [UserController::class, 'role_assign']);
-        Route::put('role-assign', [UserController::class, 'role_assign_update']);
+        Route::post('role-assign-update', [UserController::class, 'role_assign_update']);
         Route::get('role-assign-edit/{user}', [UserController::class, 'role_assign_edit']);
         Route::delete('role-assign/{user}', [UserController::class, 'role_assign_delete']);
     }
