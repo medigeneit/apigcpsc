@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\Schedule;
 use App\Models\User;
 use Carbon\Carbon;
@@ -18,9 +19,10 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        return UserResource::collection(User::paginate($request->perpage ?? 10));
     }
 
     /**
@@ -30,7 +32,6 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -41,7 +42,21 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // return
+        $fields = $this->validation($request);
+        $user = User::create($fields);
+
+        if ($user) {
+            return [
+                'success' => true,
+                'message' => 'Record saved successfully..'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Sorry !!!\\nRecord couldnot be saved...'
+            ];
+        }
     }
 
     /**
@@ -52,7 +67,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return new UserResource($user);
     }
 
     /**
@@ -63,7 +78,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        return new UserResource($user);
     }
 
     /**
@@ -75,7 +90,26 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        if($user->phone == $request->phone){
+            $phone_change = false;
+        }
+        if($user->email == $request->email){
+            $email_change = false;
+        }
+        $fields = $this->validation($request,$phone_change,$email_change);
+        $user->Update($fields);
+
+        if ($user) {
+            return [
+                'success' => true,
+                'message' => 'Record saved successfully..'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Sorry !!!\\nRecord couldnot be saved...'
+            ];
+        }
     }
 
     /**
@@ -86,7 +120,18 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $flag = $user->delete();
+        if ($flag) {
+            return [
+                'success' => true,
+                'message' => 'Record deleted successfully..'
+            ];
+        }else {
+            return [
+                'success' => false,
+                'message' => 'Sorry !!!\\nRecord couldnot be deleted...'
+            ];
+        }
     }
 
 
@@ -102,31 +147,27 @@ class UserController extends Controller
 
         $user = User::where('phone', $request->phone)->first();
 
-        if($user){
+        if ($user) {
             return [
-                'user'=>$user,
-                'success'=>true,
+                'user' => $user,
+                'success' => true,
             ];
-
-        }else{
+        } else {
             return [
-                'user'=>$user,
-                'success'=>false,
+                'user' => $user,
+                'success' => false,
             ];
-
         }
-
-
     }
 
     public function assigned_users()
     {
-        $users =  User::with('roles')->has('roles')->get()->makeHidden(['created_at','updated_at','email_verified_at'])->map(function($user){
+        $users =  User::with('roles')->has('roles')->get()->makeHidden(['created_at', 'updated_at', 'email_verified_at'])->map(function ($user) {
             // $user['all_roles'] = [];
             $user['name'] =  $user['name'] ?? '';
             $user['phone'] =  $user['phone'] ?? '';
             $user['email'] =  $user['email'] ?? '';
-            $user['gender'] =  $user['gender'] ;
+            $user['gender'] =  $user['gender'];
             $user['bmdc'] =  $user['bmdc'] ?? '';
             $user['medical'] =  $user['medical'] ?? '';
             $user['session'] =  $user['session'] ?? '';
@@ -138,21 +179,21 @@ class UserController extends Controller
         // return $users->unsetRelation('roles');
     }
 
-    public function role_assign( Request $request)
+    public function role_assign(Request $request)
     {
         // return $request;
         $user = User::find($request->user_id);
         $user->assignRole($request->role);
         return $this->assigned_users();
     }
-    public function role_assign_update( Request $request)
+    public function role_assign_update(Request $request)
     {
         // return $request;
         $user = User::find($request->user_id);
         $user->syncRoles($request->role);
         return $this->assigned_users();
     }
-    public function role_assign_edit( User $user)
+    public function role_assign_edit(User $user)
     {
         // return $user;
         // $user = User::find($request->user_id);
@@ -165,7 +206,7 @@ class UserController extends Controller
             ->where('name', '!=', 'Super Admin')
             ->get();
 
-        return[
+        return [
             'user'  => $user,
             'user_role'  => $user_role,
             'roles'  => $roles,
@@ -178,18 +219,38 @@ class UserController extends Controller
         $user->roles()->detach();
 
         return $this->assigned_users();
-
     }
-    public function user_role (User $user)
+    public function user_role(User $user)
     {
         // $user_role = $user->roles->pluck('id');
 
         return $user->load('roles');
-
     }
     // public function edit_role()
     // {
     //     $user->assignRole('writer');
     //     return User::with('roles')->get();
     // }
+
+    private function validation($request, $phone_change = true, $email_change = true)
+    {
+        // $phone_change =
+        $fields = [
+            'name'      => "required",
+            'gender'    => "required",
+            'bmdc'      => "",
+            'medical'   => "",
+        ];
+        if ($phone_change) {
+            $fields['phone'] = "required|unique:users,phone";
+        }
+        if ($email_change) {
+            $fields['email'] = "nullable|email|unique:users,email";
+
+        }
+        // return $fields;
+        // return[ $phone_change , $email_change ];
+
+        return $request->validate($fields);
+    }
 }

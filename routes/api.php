@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     {
 
         Route::resource('chambers', ChamberController::class);
+        Route::resource('users', UserController::class);
 
         #~~~Schedules~~~~
         Route::resource('/schedules', ScheduleController::class);
