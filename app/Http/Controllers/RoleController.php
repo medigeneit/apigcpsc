@@ -22,6 +22,7 @@ class RoleController extends Controller
         // if(!request()->flag) {
         //     return view('admin.roles.index');
         // }
+        
         $roles = Role::query()
             ->with('users')
             ->where('name', '!=', 'Owner')

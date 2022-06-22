@@ -40,32 +40,35 @@ class AssignRoleSeeder extends Seeder
 
         $suprims = User::role(['Super Admin', 'Owner'])->get()->pluck('phone')->toArray();
 
-        if (!in_array('00000000000', $suprims)) {
-            $data = [
-                'name' => 'Super Admin (Developers)',
-                'phone' => '00000000000',
-                'password'  => '123456',
-                'hash_password'  => bcrypt('123456'),
-            ];
-            $user = User::create($data);
-            $user ->assignRole('Super Admin');
-        }else{
-            $user = User::were('phone','00000000000')->first()->assignRole('Super Admin');
+        $create_new_roles = [
+            '00000000000' => 'Super Admin',
+            '99999999999' => 'Owner',
+            '11111111111' => 'Super Admin',
+        ];
+
+        foreach($create_new_roles as $phone=>$role){
+
+            if (!in_array($phone, $suprims)) {
+                $data = [
+                    'name' => $role.' (Developers)',
+                    'phone' => $phone,
+                    'password'  => '123456',
+                    'hash_password'  => bcrypt('123456'),
+                ];
+                $user = User::create($data);
+                $user ->assignRole($role);
+            }
+            else{
+
+                $user = User::where('phone',$phone)->first();
+                $assigned_roles = $user->getRoleNames()->toArray();
+                if( !in_array($role, $assigned_roles))
+                {
+                    $user->assignRole($role);
+                }
+            }
         }
 
 
-
-        if (!in_array('99999999999', $suprims)) {
-            $data = [
-                'name' => 'Owner (Developers)',
-                'phone' => '99999999999',
-                'password'  => '123456',
-                'hash_password'  => bcrypt('123456'),
-            ];
-            $user = User::create($data);
-            $user ->assignRole('Owner');
-        }else{
-            $user = User::were('phone','99999999999')->first()->assignRole('Super Admin');
-        }
     }
 }

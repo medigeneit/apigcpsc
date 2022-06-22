@@ -46,16 +46,18 @@ class FeedbackController extends Controller
         //
         // Schedule::$mentor_details = true;
 
-        // return
-        $appointment = Appointment::with('schedule')->find($request->appointment_id);
-        $mentors = [];
-        foreach($appointment->schedule->mentors ?? [] as $type)
-        {
-            $mentors [] = $type;
-        }
-        $user_id = $request->user()->id;
 
-        if (in_array($user_id, Arr::collapse($mentors))) {
+        // return
+        $appointment = Appointment::with('assign_mentor')->find($request->appointment_id);
+        // $mentors = [];
+        // foreach($appointment->schedule->mentors ?? [] as $type)
+        // {
+            //     $mentors [] = $type;
+            // }
+            $user_id = $request->user()->id;
+
+            // if (in_array($user_id, Arr::collapse($mentors))) {
+        if ($user_id == ($appointment->assign_mentor->mentor_id ?? 0)) {
 
             $questions = FeedbackQuestion::where('type', 1)
                 ->latest()
