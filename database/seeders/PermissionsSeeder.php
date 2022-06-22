@@ -25,6 +25,7 @@ class PermissionsSeeder extends Seeder
             'Feedback',
             'Chamber',
             'Role',
+            'Role Assign',
         ];
 
         $commonPart = [
