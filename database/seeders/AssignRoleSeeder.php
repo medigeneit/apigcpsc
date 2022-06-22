@@ -31,11 +31,8 @@ class AssignRoleSeeder extends Seeder
                 'guard_name' => 'web',
                 'type' => '1',
             ];
-
-        if (count($roles))
-            foreach ($roles as $role) {
-                Role::insert($role);
-            }
+            
+        Role::insert($roles);
 
 
 
