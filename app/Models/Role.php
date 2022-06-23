@@ -11,7 +11,8 @@ class Role extends SpatieRole
 {
     use HasFactory;
 
-
+    public $timestamps = false;
+    // public $timestamps = false
     public function __construct()
     {
         parent::__construct(['guard_name' => 'web']);

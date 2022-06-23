@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LastAppointmentResource;
+use App\Http\Resources\UserResource;
 use App\Models\Appointment;
 use App\Models\MentorAssign;
 use App\Models\Role;
@@ -324,10 +325,12 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment)
     {
+        // return $appointment->patient;
         $roles = Role::with('users')->where('type', 2)->get();
 
 
         return [
+            'patient' => new UserResource($appointment->patient),
             'appointment' => $appointment,
             'support_types' => Role::select('id', 'name')->where('type', 2)->get(),
             'mentor' => $roles->pluck('users', 'id')

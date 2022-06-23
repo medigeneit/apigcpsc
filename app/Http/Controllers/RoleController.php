@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\SpatieRole;
 
 class RoleController extends Controller
 {
@@ -22,7 +21,7 @@ class RoleController extends Controller
         // if(!request()->flag) {
         //     return view('admin.roles.index');
         // }
-        
+
         $roles = Role::query()
             ->with('users')
             ->where('name', '!=', 'Owner')
@@ -48,7 +47,10 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
-        $role = Role::create($this->validation($request));
+        $fields = $this->validation($request);
+        $fields['guard_name'] = 'web';
+        Role::insert($fields);
+        $role = Role::where('name', $fields['name'])->first();
 
         $role->syncPermissions($request->permission);
 
