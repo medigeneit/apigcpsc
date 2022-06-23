@@ -12,9 +12,14 @@ class UserResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
+    static $EditPassword = false;
+
     public function toArray($request)
     {
-        return [
+
+        $data= [];
+        $data =  [
             'id' => $this->id,
             'name' => $this->name,
             'phone' => $this->phone,
@@ -23,5 +28,10 @@ class UserResource extends JsonResource
             'bmdc' => $this->bmdc,
             'medical' => $this->medical,
         ];
+
+        if(self::$EditPassword){
+            $data ['password'] = $this->password;
+        }
+        return $data;
     }
 }

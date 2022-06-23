@@ -22,6 +22,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //
+
         return UserResource::collection(User::paginate($request->perpage ?? 10));
     }
 
@@ -78,7 +79,13 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return new UserResource($user);
+        // $user->makeVisible('password');
+        // return
+
+        UserResource::$EditPassword = true;
+
+        $data = new UserResource($user);
+        return $data;
     }
 
     /**
@@ -90,24 +97,28 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        // return $request;
+
+        $phone_change = $email_change = true;
         if($user->phone == $request->phone){
             $phone_change = false;
         }
         if($user->email == $request->email){
             $email_change = false;
         }
+        // return[$user->phone == $request->phone, $phone_change , $email_change];
         $fields = $this->validation($request,$phone_change,$email_change);
-        $user->Update($fields);
-
+        $user->update($fields);
+        return $fields;
         if ($user) {
             return [
                 'success' => true,
-                'message' => 'Record saved successfully..'
+                'message' => 'Record updated successfully..'
             ];
         } else {
             return [
                 'success' => false,
-                'message' => 'Sorry !!!\\nRecord couldnot be saved...'
+                'message' => 'Sorry !!!\\nRecord couldnot be updated...'
             ];
         }
     }
@@ -240,6 +251,7 @@ class UserController extends Controller
             'gender'    => "required",
             'bmdc'      => "",
             'medical'   => "",
+            'password'   => "",
         ];
         if ($phone_change) {
             $fields['phone'] = "required|unique:users,phone";
