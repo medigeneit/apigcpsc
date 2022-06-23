@@ -7,6 +7,7 @@ use App\Http\Resources\ScheduleResource;
 use App\Models\Appointment;
 use App\Models\Chamber;
 use App\Models\Feedback;
+use App\Models\Role;
 use App\Models\Schedule;
 use App\Models\User;
 use Carbon\Carbon;
@@ -17,7 +18,6 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use phpDocumentor\Reflection\Types\Boolean;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class ScheduleController extends Controller
 {
@@ -216,6 +216,7 @@ class ScheduleController extends Controller
      */
     public function edit(Schedule $schedule)
     {
+        // return $schedule;
         // return $schedule->time_schedule['start_time'];
         $schedule->start_time =  date("H:i:s", strtotime($schedule->time_schedule['start_time']));
         $schedule->end_time = date("H:i:s", strtotime($schedule->time_schedule['end_time']));
@@ -231,6 +232,7 @@ class ScheduleController extends Controller
         // $chambers = Chamber::get();
         // return $chambers;
         // $roles = Role::select('id', 'name')->where('type', 2)->get();
+        // return
         $support_type = Role::select('id', 'name')->with('users')->where('type', 2)->get();
         return [
             'schedule' => $schedule,
