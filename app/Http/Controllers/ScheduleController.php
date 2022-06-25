@@ -435,7 +435,7 @@ class ScheduleController extends Controller
         // return $request;
 
         $raw_schedules = Schedule::query()
-            // ->where('date', '>=', Carbon::now())
+            ->where('date', '>=', Carbon::now())
             ->when($this->support_type, function ($query, $support_type) {
                 return $query->whereNotNull('slot_threshold->' . $support_type)
                     ->with(['appointments' => function ($q) use ($support_type) {
@@ -505,7 +505,8 @@ class ScheduleController extends Controller
             ];
         });
         $chambers = Chamber::get(['id', 'name', 'address']);
-        $dates = Schedule::orderBy('date')->distinct('date')->pluck('date');
+        $dates = Schedule::where('date', '>=', Carbon::now())
+            ->orderBy('date')->distinct('date')->pluck('date');
 
         // return round(($chamber_groups->where('mentor_probability', '!=', 100)->where('mentor_probability', '!=', 5)->max('mentor_probability')) ?? 5);
 
