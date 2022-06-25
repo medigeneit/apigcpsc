@@ -108,8 +108,8 @@ class UserController extends Controller
         }
         // return[$user->phone == $request->phone, $phone_change , $email_change];
         $fields = $this->validation($request,$phone_change,$email_change);
+        // return $fields;
         $user->update($fields);
-        return $fields;
         if ($user) {
             return [
                 'success' => true,

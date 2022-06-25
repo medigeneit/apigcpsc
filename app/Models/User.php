@@ -24,15 +24,15 @@ class User extends Authenticatable
 
     static $payable_counselling_type = [4];
 
-    // protected $guarded = [];
+    protected $guarded = [];
 
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'password',
-        'hash_password',
-    ];
+    // protected $fillable = [
+    //     'name',
+    //     'email',
+    //     'phone',
+    //     'password',
+    //     'hash_password',
+    // ];
 
     /**
      * The attributes that should be hidden for serialization.
