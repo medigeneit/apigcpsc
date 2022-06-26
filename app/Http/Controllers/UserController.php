@@ -43,8 +43,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // return
         $fields = $this->validation($request);
+        $fields ['hash_password']  = bcrypt($fields['password']);
+        // return  $fields ;
         $user = User::create($fields);
 
         if ($user) {

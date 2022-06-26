@@ -38,26 +38,37 @@ class ScheduleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $support_types = Role::query()
             ->where('type', 2)
             ->pluck('name', 'id');
 
+        // return
         $schedules = Schedule::query()
-            ->get()
-            ->makeHidden([
-                'created_at',
-                'updated_at',
-                'deleted_at',
-            ]);
+            ->with([
+                'appointments:id,schedule_id,type',
+                'appointments.assign_mentor:id,mentor_id,appointment_id',
+                'appointments.assign_mentor.user:id,name',
+            ])
+            ->when($request->availability==1, function ($query) {
+                $query->where('date', '>=', Carbon::now())
+                    ->orderBy('date');
+            })
+            ->when($request->availability==2, function ($query) {
+                $query->where('date', '<', Carbon::now())
+                    ->orderBy('date', 'desc');
+            })
+            // ->get()
+            // ->hidden([
+            //     'created_at',
+            //     'updated_at',
+            //     'deleted_at',
+            // ])
+            ->paginate($request->perpage ?? 15);
 
-        $schedules->load([
-            'appointments:id,schedule_id,type',
-            'appointments.assign_mentor:id,mentor_id,appointment_id',
-            'appointments.assign_mentor.user:id,name',
-        ]);
+        // $schedules->load();
 
         $mentors = [];
 
