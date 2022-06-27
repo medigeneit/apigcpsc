@@ -97,7 +97,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if (in_array($role->name, ['Owner', 'Super Admin'])) {
+        if (in_array($role->name, ['Owner', 'Super Admin']) || $role->type == 2 ) {
             return abort(404);
         }
 
