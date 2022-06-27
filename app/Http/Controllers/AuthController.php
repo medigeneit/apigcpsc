@@ -24,20 +24,20 @@ class AuthController extends Controller
         // Check phone
         $user = User::where('phone', $fields['phone'])->first();
 
+        $code = rand(1111, 9999);
 
         if (!$user) {
+
             $code = rand(1111, 9999);
+
+            $message = "Your GCPSC verification pin {$code}";
+
+            $this->sendSMS($fields['phone'], $message);
 
             Otp::updateOrCreate(
                 ['phone' => $fields['phone']],
                 ['code'  => $code,]
             );
-
-            // $sms = new Sms();
-
-            // $text = "Your OTP code : {$code}";
-
-            // $sms->setText($text)->setRecipient($fields['phone'])->send();
         }
 
         return response([
@@ -50,13 +50,12 @@ class AuthController extends Controller
 
     public function confirm(Request $request)
     {
-        // return
         $fields = $request->validate([
             'phone'     => 'required|string',
             'code'      => 'required|size:4|regex:/^[0-9]+$/',
         ]);
         // return
-            $otp = $this->getOtp($fields['code'], $fields['phone']);
+        $otp = $this->getOtp($fields['code'], $fields['phone']);
 
         if (!$otp) {
             return response([
@@ -70,7 +69,7 @@ class AuthController extends Controller
 
         // return
         $response = Http::get('https://api.genesisedu.info/general/find-doc', [
-        // $response = Http::get('http://192.168.88.189:7000/general/find-doc', [
+            // $response = Http::get('http://192.168.88.189:7000/general/find-doc', [
             'phone' => $request->phone,
             // 'demand ' => ['name','mobile_number',' ','main_password','gender','bmdc_no']
         ]);
@@ -179,7 +178,6 @@ class AuthController extends Controller
         }
 
         return response($user->setAndGetLoginResponse(), 201);
-
     }
 
 
