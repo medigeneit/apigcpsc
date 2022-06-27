@@ -36,4 +36,29 @@ class Controller extends BaseController
             ->where('code', $code)
             ->find($phone);
     }
+
+    public function sendSMS($phone, $message)
+    {
+
+        $postvars = array(
+            'userID'    => "Genesis",
+            'passwd'    => "genesisAPI@019",
+            'sender'    => "8801969901099",
+            'msisdn'    => "88" . substr($phone, -11, 11),
+            'message'   => $message,
+        );
+
+        $url = "https://vas.banglalink.net/sendSMS/sendSMS";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);                //0 for a get request
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postvars);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        $response = curl_exec($ch);
+        print "curl response is:" . //$response;echo "<pre>";print_r($response);exit;
+        curl_close ($ch);
+
+    }
 }
