@@ -53,11 +53,11 @@ class ScheduleController extends Controller
                 'appointments.assign_mentor.user:id,name',
             ])
             ->when($request->availability==1, function ($query) {
-                $query->where('date', '>=', Carbon::now())
+                $query->where('date', '>=', Carbon::now()->format('Y-m-d'))
                     ->orderBy('date');
             })
             ->when($request->availability==2, function ($query) {
-                $query->where('date', '<', Carbon::now())
+                $query->where('date', '<', Carbon::now()->format('Y-m-d'))
                     ->orderBy('date', 'desc');
             })
             // ->get()
@@ -446,7 +446,7 @@ class ScheduleController extends Controller
         // return $request;
 
         $raw_schedules = Schedule::query()
-            ->where('date', '>=', Carbon::now())
+            ->where('date', '>=', Carbon::now()->format('Y-m-d'))
             ->when($this->support_type, function ($query, $support_type) {
                 return $query->whereNotNull('slot_threshold->' . $support_type)
                     ->with(['appointments' => function ($q) use ($support_type) {
