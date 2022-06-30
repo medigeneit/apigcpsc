@@ -38,14 +38,13 @@ class AuthController extends Controller
                 ['phone' => $fields['phone']],
                 ['code'  => $code,]
             );
-            
         }
 
         return response([
             'phone'     => $fields['phone'],
             'name'      => $user->name ?? '',
             'has_user'  => (bool) $user,
-            'code'      => $code ?? 0,
+            // 'code'      => $code ?? 0,
         ], 200);
     }
 

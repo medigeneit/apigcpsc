@@ -57,8 +57,9 @@ class Controller extends BaseController
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         $response = curl_exec($ch);
-        print "curl response is:" . //$response;echo "<pre>";print_r($response);exit;
-        curl_close ($ch);
 
+        curl_close($ch);
+
+        return $response;
     }
 }
