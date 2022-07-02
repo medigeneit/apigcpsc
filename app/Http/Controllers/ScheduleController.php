@@ -52,11 +52,11 @@ class ScheduleController extends Controller
                 'appointments.assign_mentor:id,mentor_id,appointment_id',
                 'appointments.assign_mentor.user:id,name',
             ])
-            ->when($request->availability==1, function ($query) {
+            ->when($request->availability == 1, function ($query) {
                 $query->where('date', '>=', Carbon::now()->format('Y-m-d'))
                     ->orderBy('date');
             })
-            ->when($request->availability==2, function ($query) {
+            ->when($request->availability == 2, function ($query) {
                 $query->where('date', '<', Carbon::now()->format('Y-m-d'))
                     ->orderBy('date', 'desc');
             })
@@ -70,7 +70,8 @@ class ScheduleController extends Controller
 
         // $schedules->load();
 
-        $mentors = [];
+        // return
+
 
         $schedule_map = $schedules->map(function ($schedule) {
             $mentors = $schedule->appointments->whereNotNull('assign_mentor')->groupBy('type');
@@ -547,7 +548,7 @@ class ScheduleController extends Controller
             $message = $schedules->where('id', $request->schedule_id)->first()->mentor_possibility;
         }
 
-
+        $roles = Role::with('users')->where('type', 2)->get();
         return [
             // 'test' => $test,
             // 'mentor_probability' => $mentor_probability,
@@ -561,6 +562,7 @@ class ScheduleController extends Controller
             'dates' => $dates_map,
             'time_condition' => (bool)((bool)$date && (bool)$chamber_id && (count($schedules) >= 2) ? true : false),
             'schedules' => ((bool)$date && (bool)$chamber_id ? $schedules : []),
+            'mentors' =>   $roles->pluck('users', 'id')
 
         ];
     }
