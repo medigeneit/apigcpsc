@@ -73,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         #~~~Appointments~~~~
         Route::resource('/appointments', AppointmentController::class);
         Route::post('/mentor-assign', [AppointmentController::class, 'mentor_assign']);
-        Route::put('/mentor-assign/{id}', [AppointmentController::class, 'mentor_assign_edit']);
+        Route::put('/mentor-assign/{appointment}', [AppointmentController::class, 'mentor_assign_edit']);
         Route::get('find-users', [UserController::class, 'find_user']);
 
 

@@ -195,7 +195,7 @@ class AppointmentController extends Controller
         // $mentor_assign = MentorAssign::find($id)->withTrashed();
 
 
-        MentorAssign::withTrashed()->where('id', $id)->updateOrCreate([
+        MentorAssign::withTrashed()->updateOrCreate([
             'appointment_id' => $request->appointment_id,
         ], [
             'mentor_id' => $request->mentor_id,
@@ -309,12 +309,12 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-         $appointment->load('schedule','assign_mentor.user:id,name,phone,email');
-         LastAppointmentResource::$types =  Role::where('type', 2)->pluck('name', 'id');
-         $appointment_data['schedule'] = $appointment->schedule;
-         $appointment_data['appointment'] = new LastAppointmentResource($appointment);
+        $appointment->load('schedule', 'assign_mentor.user:id,name,phone,email');
+        LastAppointmentResource::$types =  Role::where('type', 2)->pluck('name', 'id');
+        $appointment_data['schedule'] = $appointment->schedule;
+        $appointment_data['appointment'] = new LastAppointmentResource($appointment);
         //  return
-         return $appointment_data;
+        return $appointment_data;
     }
 
     /**
