@@ -31,7 +31,7 @@ class AssignRoleSeeder extends Seeder
                 'guard_name' => 'web',
                 'type' => '1',
             ];
-            
+
         Role::insert($roles);
 
 
@@ -42,8 +42,8 @@ class AssignRoleSeeder extends Seeder
         $create_new_roles = [
             '00000000000' => 'Super Admin',
             '99999999999' => 'Owner',
-            '11111111111' => 'Super Admin',
-            '11111111111' => 'Exicutive',
+            // '11111111111' => 'Super Admin',
+            // '11111111111' => 'Exicutive',
         ];
 
         foreach ($create_new_roles as $phone => $role) {
