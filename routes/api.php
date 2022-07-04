@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         #~~~Legally Binding Contract ~~~~
         Route::resource('legally-binding-contract', LegallyBindingContractController::class);
+        Route::get('show-list', [LegallyBindingContractController::class, 'showList']);
     }
 
 
@@ -123,4 +124,3 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // Route::resource('mentor-assigns', MentorAssignController::class);
-

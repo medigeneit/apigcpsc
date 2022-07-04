@@ -11,7 +11,16 @@ class LegallyBindingContractController extends Controller
     public function index()
     {
         return LegallyBindingContract::get();
-        // return LegallyBindingContract::property('terms_conditions')->first();
+    }
+
+    public function showList()
+    {
+        $terms_conditions = LegallyBindingContract::property('terms_conditions')->first();
+        $about = LegallyBindingContract::property('about')->first();
+        return [
+            'terms_conditions' => $terms_conditions,
+            'about' => $about,
+        ];
     }
 
     public function store(Request $request)
