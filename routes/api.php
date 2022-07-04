@@ -44,6 +44,10 @@ Route::post('logout',  [AuthController::class, 'logout']);
 Route::post('register', [AuthController::class, 'register'])
     ->middleware('throttle:20,1,register');
 
+#~~~Legally Binding Contract ~~~~
+Route::resource('legally-binding-contract', LegallyBindingContractController::class);
+Route::get('show-list', [LegallyBindingContractController::class, 'showList']);
+
 
 
 //->middleware('throttle:6,1,confirm');
@@ -87,10 +91,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('role-assign-update', [UserController::class, 'role_assign_update']);
         Route::get('role-assign-edit/{user}', [UserController::class, 'role_assign_edit']);
         Route::delete('role-assign/{user}', [UserController::class, 'role_assign_delete']);
-
-        #~~~Legally Binding Contract ~~~~
-        Route::resource('legally-binding-contract', LegallyBindingContractController::class);
-        Route::get('show-list', [LegallyBindingContractController::class, 'showList']);
     }
 
 
@@ -110,6 +110,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/my-profile', [AppointmentController::class, 'my_profile']);
     }
 });
+
+
 
 
 
