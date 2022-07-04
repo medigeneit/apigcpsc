@@ -30,9 +30,9 @@ class AuthController extends Controller
 
             $code = rand(1111, 9999);
 
-            // $message = "Your GCPSC verification pin {$code}";
+            $message = "Your GCPSC verification pin {$code}";
 
-            // $this->sendSMS($fields['phone'], $message);
+            $this->sendSMS($fields['phone'], $message);
 
             Otp::updateOrCreate(
                 ['phone' => $fields['phone']],
