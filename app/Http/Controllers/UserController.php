@@ -22,8 +22,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //
+        // return $request
+        $user  = User::when($request->search, function($query) use($request){
+            $query -> where('name','like', "%{$request->search}%")
+             -> orWhere('phone','like', "%{$request->search}%");
+        });
+        // return  $user->paginate($request->perpage ?? 10);
+        // return $user ->get();
 
-        return UserResource::collection(User::paginate($request->perpage ?? 10));
+        return UserResource::collection( $user->paginate($request->perpage ?? 10));
     }
 
     /**

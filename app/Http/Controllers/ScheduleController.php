@@ -45,6 +45,14 @@ class ScheduleController extends Controller
             ->where('type', 2)
             ->pluck('name', 'id');
 
+            $int_time = NULL;
+            // $mentor = NULL;
+            if ($request->time)
+                $int_time = (int) Schedule::encodeTime($request->time);
+            $date = $request->date;
+            $chamber_id = $request->chamber_id;
+            $support_type = $request->support_type;
+
         // return
         $schedules = Schedule::query()
             ->with([
@@ -59,13 +67,32 @@ class ScheduleController extends Controller
             ->when($request->availability == 2, function ($query) {
                 $query->where('date', '<', Carbon::now()->format('Y-m-d'))
                     ->orderBy('date', 'desc');
-            })
+            });
             // ->get()
             // ->hidden([
             //     'created_at',
             //     'updated_at',
             //     'deleted_at',
             // ])
+            $schedules = $schedules->when($support_type, function ($query, $support_type) {
+                return $query->whereNotNull('slot_threshold->' . $support_type)
+                    ->with(['appointments' => function ($q) use ($support_type) {
+                        $q->select('schedule_id', 'requested_mentor_id')
+                            ->where('type', $support_type);
+                        // ->coune();
+                        // ->pluck('requested_mentor_id');
+                    }]);
+            })
+            ->when($int_time, function ($query, $int_time) {
+                return $query->where('time_schedule->s', '<', $int_time)
+                    ->where('time_schedule->e', '>', $int_time);
+            })
+            ->when($date, function ($query, $date) {
+                return $query->where('date', $date);
+            })
+            ->when($chamber_id, function ($query, $chamber_id) {
+                return $query->where('chamber_id', $chamber_id);
+            })
             ->paginate($request->perpage ?? 15);
 
         // $schedules->load();
