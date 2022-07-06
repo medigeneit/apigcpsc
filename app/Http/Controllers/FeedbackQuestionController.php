@@ -24,7 +24,7 @@ class FeedbackQuestionController extends Controller
      */
     public function create()
     {
-        //
+        return FeedbackQuestion::$Types;
     }
 
     /**
@@ -37,15 +37,19 @@ class FeedbackQuestionController extends Controller
     {
         //
         FeedbackQuestion::create([
-            'type'=> 1,
-            'questions'=> json_encode([
-                '1'=> "Mentor Feed back question 1",
-                '2'=> "Mentor Feed back question 2",
-                '3'=> "Mentor Feed back question 3",
-                '4'=> "Mentor Feed back question 4",
-                '5'=> "Mentor Feed back question 5",
-            ]),
+            'type'=> $request->type,
+            'questions'=> json_encode( $request->questions),
         ]);
+        // FeedbackQuestion::create([
+        //     'type'=> 1,
+        //     'questions'=> json_encode([
+        //         '1'=> "Mentor Feed back question 1",
+        //         '2'=> "Mentor Feed back question 2",
+        //         '3'=> "Mentor Feed back question 3",
+        //         '4'=> "Mentor Feed back question 4",
+        //         '5'=> "Mentor Feed back question 5",
+        //     ]),
+        // ]);
         // FeedbackQuestion::create([
         //     'type'=> 0,
         //     'questions'=> json_encode([
@@ -66,7 +70,7 @@ class FeedbackQuestionController extends Controller
      */
     public function show(FeedbackQuestion $feedbackQuestion)
     {
-        //
+        return $feedbackQuestion;
     }
 
     /**

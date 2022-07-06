@@ -25,15 +25,30 @@ class FeedbackController extends Controller
     {
         //
         return
-        FeedbackQuestion::with('feedbacks')
-        ->where('type',$request->type)
-        ->when($request->type == 1, function($query){
-            $query->with('feedbacks.mentor');
-        })
-        ->when($request->type == 0, function($query){
-            $query->with('feedbacks.mentor');
-        })
-        ->get();
+        $feedbacks_questions = FeedbackQuestion::with('feedbacks')
+            ->where('type', $request->type)
+            ->when($request->type == 1, function ($query) {
+                $query->with('feedbacks.mentor');
+            })
+            ->when($request->type == 0, function ($query) {
+                $query->with('feedbacks.mentor');
+            })
+            ->get();
+        $feedback_array = $feedbacks_questions->first()->feedbacks->pluck('ratings')->toArray();
+        return $feedback_array;
+
+        $feedback_position = 1;
+        $feedback_value = 3;
+
+
+        // echo "<pre>";
+        return (count(array_filter($feedback_array, function ($ratings) use ($feedback_position, $feedback_value) {
+            return $ratings[$feedback_position] == $feedback_value;
+        })));
+        // echo "</pre>";
+
+
+        // return array_pluck($temp, '2');
     }
 
     /**
@@ -52,18 +67,17 @@ class FeedbackController extends Controller
         // $mentors = [];
         // foreach($appointment->schedule->mentors ?? [] as $type)
         // {
-            //     $mentors [] = $type;
-            // }
-            $user_id = $request->user()->id;
+        //     $mentors [] = $type;
+        // }
+        $user_id = $request->user()->id;
 
-            // if (in_array($user_id, Arr::collapse($mentors))) {
+        // if (in_array($user_id, Arr::collapse($mentors))) {
         if ($user_id == ($appointment->assign_mentor->mentor_id ?? 0)) {
 
             $questions = FeedbackQuestion::where('type', 1)
                 ->latest()
                 ->first();
-        }
-        elseif($appointment->user_id==$user_id ) {
+        } elseif ($appointment->user_id == $user_id) {
             $questions = FeedbackQuestion::where('type', 0)
                 ->latest()
                 ->first();
@@ -74,9 +88,9 @@ class FeedbackController extends Controller
         //         ->first();
         // }
         return [
-            'appointment_id'    =>$request->appointment_id,
-            'user_id'           =>$request->user_id,
-            'questions'         =>$questions ?? []
+            'appointment_id'    => $request->appointment_id,
+            'user_id'           => $request->user_id,
+            'questions'         => $questions ?? []
         ];
     }
 
@@ -98,13 +112,12 @@ class FeedbackController extends Controller
             'note' => $request->note,
         ]);
 
-        if($feedback){
+        if ($feedback) {
             return [
-                'message'=>"Thanks for your feedback",
-                'success'=>true,
-                'feedback'=>$feedback,
+                'message' => "Thanks for your feedback",
+                'success' => true,
+                'feedback' => $feedback,
             ];
-
         }
     }
 

@@ -11,6 +11,13 @@ class FeedbackQuestion extends Model
     use HasFactory,SoftDeletes;
 
     protected $guarded = [];
+    // protected $appends = ['question_retting'];
+
+
+    static $Types = [
+        0 => 'Patient',
+        1 => 'Mentor',
+    ];
 
 
     public function getQuestionsAttribute($value)
@@ -23,4 +30,12 @@ class FeedbackQuestion extends Model
     {
         return $this->hasmany(Feedback::class,'fq_id','id');
     }
+    // public function getQuestionsRettingAttribute(Type $var = null)
+    // {
+    //     $rettings = [];
+    //     foreach($this->questions as $key=>$question){
+    //         $rettings[$question]
+    //     }
+    //     $this->feedbacks
+    // }
 }
