@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/mentor-assign', [AppointmentController::class, 'mentor_assign']);
         Route::put('/mentor-assign/{appointment}', [AppointmentController::class, 'mentor_assign_edit']);
         Route::get('find-users', [UserController::class, 'find_user']);
+        Route::get('appointment-feedback/{appointment}', [AppointmentController::class, 'appointment_feedback']);
 
 
         #~~~Roll management~~~~

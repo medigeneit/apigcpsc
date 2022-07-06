@@ -24,7 +24,7 @@ class FeedbackController extends Controller
     public function index(Request $request)
     {
         //
-        return
+        // return
         $feedbacks_questions = FeedbackQuestion::with('feedbacks')
             ->where('type', $request->type)
             ->when($request->type == 1, function ($query) {
@@ -130,6 +130,7 @@ class FeedbackController extends Controller
     public function show(Feedback $feedback)
     {
         //
+        return  $feedback;
 
     }
 

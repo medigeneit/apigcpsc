@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LastAppointmentResource;
+use App\Http\Resources\ShowFeedbackResource;
 use App\Http\Resources\UserResource;
 use App\Models\Appointment;
 use App\Models\MentorAssign;
@@ -405,5 +406,18 @@ class AppointmentController extends Controller
     public function destroy(Appointment $appointment)
     {
         //
+    }
+
+    public function appointment_feedback(Appointment $appointment)
+    {
+        // $appointment->load('mentor_feedbacks.mentor');
+
+        // return
+        $appointment_feedback = $appointment->load('patient','user_feedbacks.question','mentor_feedbacks.question','mentor');
+        ShowFeedbackResource::withoutWrapping();
+        return new ShowFeedbackResource($appointment_feedback);
+
+
+
     }
 }
