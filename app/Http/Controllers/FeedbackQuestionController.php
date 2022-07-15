@@ -12,9 +12,13 @@ class FeedbackQuestionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+
+        $feedbackQuestion = FeedbackQuestion::where('type', $request->type ? $request->type : 0 )->pluck('questions');
+        return [
+            'question' =>  $feedbackQuestion
+        ];
     }
 
     /**
@@ -35,10 +39,15 @@ class FeedbackQuestionController extends Controller
      */
     public function store(Request $request)
     {
+        $questions = [];
+
+        foreach ($request->questions as $value) {
+            $questions[] = $value;
+        }
         //
         FeedbackQuestion::create([
-            'type'=> $request->type,
-            'questions'=> json_encode( $request->questions),
+            'type' => $request->type,
+            'questions' => $questions,
         ]);
         // FeedbackQuestion::create([
         //     'type'=> 1,
@@ -70,6 +79,7 @@ class FeedbackQuestionController extends Controller
      */
     public function show(FeedbackQuestion $feedbackQuestion)
     {
+        // return 6464;
         return $feedbackQuestion;
     }
 

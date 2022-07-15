@@ -369,7 +369,7 @@ class ScheduleController extends Controller
         foreach ($schedule->slot_threshold as $key => $value) {
             if ($key ==  $this->support_type) {
                 // $data["slot_remains"] = (int)(($value->slot - $appointment_count) );
-                $data["slot_remains"] = (float)((($value->slot - $appointment_count)<0 ? 0: ($value->slot - $appointment_count)) / $value->slot * 100);
+                $data["slot_remains"] = (float)((($value->slot - $appointment_count) < 0 ? 0 : ($value->slot - $appointment_count)) / $value->slot * 100);
             }
         }
         // $data["mentor_possibility"] = (object) ($this->appointments->groupBy('requested_mentor_id')->sort()->map(function ($q) use ($appointment_count){
@@ -575,8 +575,9 @@ class ScheduleController extends Controller
         //     $slot_massage = $schedules->where('id', $request->schedule_id)->first()->slot_remains != 0 ? '' : "Sorry...!!!\nThis slots for this schedule has has been filled completely.";
         //     $message = $schedules->where('id', $request->schedule_id)->first()->mentor_possibility;
         // }
+        
         $slot_remains = (bool) round($schedules->avg('slot_remains'));
-        $slot_massage = $slot_remains >0 ? '' : "Sorry...!!!\nThis slots for this schedule has has been filled completely.";
+        $slot_massage = $slot_remains > 0 ? '' : "Srroy!!! Slot is Already filled";
 
         $roles = Role::with('users')->where('type', 2)->get();
         return [

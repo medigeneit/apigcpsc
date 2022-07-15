@@ -22,7 +22,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //
-        // return $request
+        // return $request;
         $user  = User::when($request->search, function($query) use($request){
             $query -> where('name','like', "%{$request->search}%")
              -> orWhere('phone','like', "%{$request->search}%");
