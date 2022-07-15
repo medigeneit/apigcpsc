@@ -8,26 +8,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Feedback extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
-    protected $guarded=[];
+    protected $guarded = [];
+
+
+    protected $casts = [
+        'ratings' => 'json'
+    ];
 
     public function mentor()
     {
-        return $this->belongsTo(User::class,'mentor_id','id')
-        ->Latest();
+        return $this->belongsTo(User::class, 'mentor_id', 'id')
+            ->Latest();
     }
 
     public function question()
     {
-        return $this->belongsTo(FeedbackQuestion::class,'fq_id','id');
+        return $this->belongsTo(FeedbackQuestion::class, 'fq_id', 'id');
     }
 
-    public function getRatingsAttribute($value)
-    {
-        $ratings = json_decode($value);
-        return $ratings;
-    }
+    // public function getRatingsAttribute($value)
+    // {
+    //     $ratings = json_decode($value);
+    //     return $ratings;
+    // }
+
     public function setRatingsAttribute($value)
     {
         $ratings = json_encode($value);

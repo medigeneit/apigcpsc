@@ -16,6 +16,8 @@ use Spatie\Permission\Models\Role;
 
 class FeedbackController extends Controller
 {
+
+
     /**
      * Display a listing of the resource.
      *
@@ -28,28 +30,56 @@ class FeedbackController extends Controller
         $feedbacks_questions = FeedbackQuestion::with('feedbacks')
             ->where('type', $request->type)
             ->when($request->type == 1, function ($query) {
-                $query->with('feedbacks.mentor');
+                $query->with('feedbacks:id,fq_id,ratings');
             })
             ->when($request->type == 0, function ($query) {
-                $query->with('feedbacks.mentor');
+                $query->with('feedbacks:id,fq_id,ratings');
             })
             ->get();
-        $feedback_array = $feedbacks_questions->first()->feedbacks->pluck('ratings')->toArray();
-        return $feedback_array;
 
-        $feedback_position = 1;
-        $feedback_value = 3;
+        // return
 
+        $feedback_rettings = [1, 2, 3, 4, 5];
+        $data = []; {
+            foreach ($feedbacks_questions as $feedbacks_question) {
+                $data['count'] = 0;
+                $data['questions'] =  $feedbacks_question->questions;
+                foreach ($feedbacks_question->questions as $key => $question) {
+                    foreach ($feedback_rettings as $retting) {
+                        $data['question_rettings'][$key][$retting] = 0;
+                    }
+                }
+                $feedback_array = $feedbacks_question->feedbacks;
+                foreach ($feedback_array as $feedback) {
+                    $data['count'] += 1;
+                    foreach ($feedback->ratings as $key => $ret) {
+                        $data['question_rettings'][$key][$ret] += 1;
+                    }
+                }
+            }
+        }
 
-        // echo "<pre>";
-        return (count(array_filter($feedback_array, function ($ratings) use ($feedback_position, $feedback_value) {
-            return $ratings[$feedback_position] == $feedback_value;
-        })));
-        // echo "</pre>";
+        return  $data;
 
+        // {
+        //     foreach ($feedbacks_questions as $feedbacks_question) {
+        //         $feedback_array = $feedbacks_question->feedbacks->pluck('ratings')->toArray();
+        //         $data['questions'] =  $feedbacks_question->questions;
+        //         $data['question_rettings'] =  [];
+        //         foreach ($feedbacks_question->questions as $feedback_position => $question) {
+        //             foreach ($feedback_rettings as $feedback_value) {
 
-        // return array_pluck($temp, '2');
+        //                 $data['question_rettings'][$feedback_position][$feedback_value] = count(array_filter($feedback_array, function ($ratings) use ($feedback_position, $feedback_value) {
+        //                     return $ratings[$feedback_position] == $feedback_value;
+        //                 }));
+        //             }
+        //         }
+        //     }
+        // }
+
+        return $data;
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -131,7 +161,6 @@ class FeedbackController extends Controller
     {
         //
         return  $feedback;
-
     }
 
     /**

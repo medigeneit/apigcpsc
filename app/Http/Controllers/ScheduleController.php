@@ -576,7 +576,7 @@ class ScheduleController extends Controller
         //     $message = $schedules->where('id', $request->schedule_id)->first()->mentor_possibility;
         // }
         $slot_remains = (bool) round($schedules->avg('slot_remains'));
-        $slot_massage = $slot_remains >0 ? '' : "Sorry...!!!\nThis slots for this schedule has has been filled completely.";
+        $slot_massage = $slot_remains >0 ? '' : "Sorry...!!!\nThis slots for this schedule has been filled completely.";
 
         $roles = Role::with('users')->where('type', 2)->get();
         return [
