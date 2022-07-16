@@ -20,6 +20,10 @@ class FeedbackQuestion extends Model
     ];
 
 
+    public function setQuestionsAttribute($value)
+    {
+        $this->attributes['questions'] = json_encode($value);
+    }
     public function getQuestionsAttribute($value)
     {
         $questions = json_decode($value);

@@ -410,11 +410,14 @@ class AppointmentController extends Controller
 
     public function appointment_feedback(Appointment $appointment)
     {
+        // return $appointment;
         // $appointment->load('mentor_feedbacks.mentor');
 
         // return
         $appointment_feedback = $appointment->load('patient','user_feedbacks.question','mentor_feedbacks.question','mentor');
+
         ShowFeedbackResource::withoutWrapping();
+
         return new ShowFeedbackResource($appointment_feedback);
 
 

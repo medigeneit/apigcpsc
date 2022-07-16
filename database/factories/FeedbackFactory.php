@@ -25,6 +25,7 @@ class FeedbackFactory extends Factory
             'fq_id' => 1,
             // 'email' => $this->faker->unique()->safeEmail(),
             // 'email_verified_at' => now(),
+
             'appointment_id' =>$this->faker->unique()->numberBetween(1,10000000),
             // 'mentor_id' => random_int(1,10),
             'ratings' => [random_int(1,5),random_int(1,5),random_int(1,5),random_int(1,5),random_int(1,5)],
