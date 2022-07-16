@@ -578,9 +578,7 @@ class ScheduleController extends Controller
         // }
 
         $slot_remains = (bool) round($schedules->avg('slot_remains'));
-
         $slot_massage = $slot_remains > 0 ? '' : "Srroy!!! Slot is Already filled";
-
 
         $roles = Role::with('users')->where('type', 2)->get();
         return [
