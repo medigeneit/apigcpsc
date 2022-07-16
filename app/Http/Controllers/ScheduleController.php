@@ -59,6 +59,7 @@ class ScheduleController extends Controller
                 'appointments:id,schedule_id,type',
                 'appointments.assign_mentor:id,mentor_id,appointment_id',
                 'appointments.assign_mentor.user:id,name',
+                'chamber:id,name',
             ])
             ->when($request->availability == 1, function ($query) {
                 $query->where('date', '>=', Carbon::now()->format('Y-m-d'))
@@ -575,9 +576,11 @@ class ScheduleController extends Controller
         //     $slot_massage = $schedules->where('id', $request->schedule_id)->first()->slot_remains != 0 ? '' : "Sorry...!!!\nThis slots for this schedule has has been filled completely.";
         //     $message = $schedules->where('id', $request->schedule_id)->first()->mentor_possibility;
         // }
-        
+
         $slot_remains = (bool) round($schedules->avg('slot_remains'));
+
         $slot_massage = $slot_remains > 0 ? '' : "Srroy!!! Slot is Already filled";
+
 
         $roles = Role::with('users')->where('type', 2)->get();
         return [
@@ -586,6 +589,7 @@ class ScheduleController extends Controller
             'slot_remains' => (bool)($slot_remains ?? false),
             // 'slot_massage' => "Please select any date and place of your choice",
             'slot_massage' => $slot_massage ?? '',
+
             'mentor_possibility' => "Please select any date and place of your choice",
             // 'mentor_possibility' => $message,
             'payable' => (float)($payable ? 500.00 : 0.00),
