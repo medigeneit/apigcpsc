@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Schedule;
 use App\Models\User;
 use GrahamCampbell\ResultType\Success;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\CommonMark\Extension\Mention\Mention;
@@ -282,16 +283,18 @@ class AppointmentController extends Controller
         }
 
         // return
-        $appointment = Appointment::create([
-            'user_id' => $user_id,
-            'schedule_id' => $request->schedule_id,
+        $appointment = Appointment::create($this->validation($request) + [
             'serial' => $serial,
-            'type' => $request->type,
-            // 'questions' => $request->questions,
-            'payable' => $request->payable,
-            'requested_mentor_id' => $request->requested_mentor_id  ?? null,
-            'questions' => $request->questions  ?? [],
         ]);
+        // $appointment = Appointment::create([
+        //     'user_id' => $user_id,
+        //     'schedule_id' => $request->schedule_id,
+        //     'serial' => $serial,
+        //     'type' => $request->type,
+        //     'payable' => $request->payable,
+        //     'requested_mentor_id' => $request->requested_mentor_id  ?? null,
+        //     'questions' => $request->questions  ?? [],
+        // ]);
 
         if ($appointment) {
             return [
@@ -414,13 +417,38 @@ class AppointmentController extends Controller
         // $appointment->load('mentor_feedbacks.mentor');
 
         // return
-        $appointment_feedback = $appointment->load('patient','user_feedbacks.question','mentor_feedbacks.question','mentor');
+        $appointment_feedback = $appointment->load('patient', 'user_feedbacks.question', 'mentor_feedbacks.question', 'mentor');
 
         ShowFeedbackResource::withoutWrapping();
 
         return new ShowFeedbackResource($appointment_feedback);
+    }
+    private function validation($request, $id = '')
+    {
+        return $request->validate([
+            'user_id' => [
+                'required',
+                'numeric',
+                Rule::unique(Appointment::class, 'user_id')
+                    ->where(function ($query) {
+                        return $query->where('schedule_id', request()->schedule_id);
+                    })
+                    ->ignore($id),
 
-
-
+            ],
+            'schedule_id' => [
+                'required',
+                'numeric',
+            ],
+            'type' => [
+                'required',
+                'numeric',
+            ],
+            'payable' => [
+                'numeric',
+            ],
+            'requested_mentor_id' => [],
+            'questions' => ['required'],
+        ]);
     }
 }

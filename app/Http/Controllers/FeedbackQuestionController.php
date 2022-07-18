@@ -39,11 +39,13 @@ class FeedbackQuestionController extends Controller
      */
     public function store(Request $request)
     {
+        
         $questions = [];
 
         foreach ($request->questions as $value) {
             $questions[] = $value;
         }
+        // return $questions;
         //
         FeedbackQuestion::create([
             'type' => $request->type,

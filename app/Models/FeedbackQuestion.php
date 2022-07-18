@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FeedbackQuestion extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = [];
     // protected $appends = ['question_retting'];
@@ -32,7 +32,7 @@ class FeedbackQuestion extends Model
 
     public function feedbacks()
     {
-        return $this->hasmany(Feedback::class,'fq_id','id');
+        return $this->hasmany(Feedback::class, 'fq_id', 'id');
     }
     // public function getQuestionsRettingAttribute(Type $var = null)
     // {
@@ -42,4 +42,6 @@ class FeedbackQuestion extends Model
     //     }
     //     $this->feedbacks
     // }
+
+    
 }

@@ -604,7 +604,7 @@ class ScheduleController extends Controller
     {
 
         $role = Role::where('type', 2)->get(['id', 'name']);
-        $mentors = [4]; // vobisshyat e dekha hobe
+        $mentors = [3, 4]; // vobisshyat e dekha hobe
         // $user_id = $request->user_id;
         // return $request->user();
         // return

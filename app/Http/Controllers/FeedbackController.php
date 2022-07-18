@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FeedbackResource;
 use App\Models\Appointment;
 use App\Models\Feedback;
 use App\Models\FeedbackQuestion;
@@ -26,27 +27,29 @@ class FeedbackController extends Controller
     public function index(Request $request)
     {
         //
-        // return
+
+        // return   
         $feedbacks_questions = FeedbackQuestion::with('feedbacks')
             ->where('type', $request->type)
             ->when($request->type == 1, function ($query) {
-                $query->with('feedbacks:id,fq_id,ratings');
+                $query->with('feedbacks:id,fq_id,ratings,appointment_id', 'feedbacks.appointments.patient');
             })
             ->when($request->type == 0, function ($query) {
-                $query->with('feedbacks:id,fq_id,ratings');
+                $query->with('feedbacks:id,fq_id,ratings,appointment_id', 'feedbacks.appointments.mentor_feedbacks.mentor');
             })
+            ->latest()
             ->get();
-
-        // return
-
-        $feedback_rettings = [1, 2, 3, 4, 5];
-        $data = []; {
-            foreach ($feedbacks_questions as $feedbacks_question) {
-                $data['count'] = 0;
-                $data['questions'] =  $feedbacks_question->questions;
-                foreach ($feedbacks_question->questions as $key => $question) {
-                    foreach ($feedback_rettings as $retting) {
-                        $data['question_rettings'][$key][$retting] = 0;
+            
+            
+            $feedback_rettings = [1, 2, 3, 4, 5];
+            $data = []; {
+                foreach ($feedbacks_questions as $feedbacks_question) {
+                    $data['count'] = 0;
+                    $data['questions'] =  $feedbacks_question->questions;
+                    
+                    foreach ($feedbacks_question->questions as $key => $question) {
+                        foreach ($feedback_rettings as $retting) {
+                            $data['question_rettings'][$key][$retting] = 0;
                     }
                 }
                 $feedback_array = $feedbacks_question->feedbacks;
@@ -58,8 +61,27 @@ class FeedbackController extends Controller
                 }
             }
         }
+        
+        
+        $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id');
+        
+        
+        $overall_retings = $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id')->map(function($group_feedbacks, $key){
+            $overall_feedback =[];
+            $overall_feedback = $group_feedbacks[0]->appointments->mentor_feedbacks->mentor;
+            $overall_feedback ['ratings']= $group_feedbacks->pluck('ratings');
+            $overall_feedback ['avg_ratings'] = array_filter($overall_feedback ['rettings'],function($query){
 
-        return  $data;
+            });
+            return  $overall_feedback ;
+        });
+        return $overall_retings->values() ;
+        // $feedbacks_questions->feedbacks->map(function($feedback))
+
+        // FeedbackResource::collection($feedbacks_questions);
+
+        return  [$data, $feedbacks_questions];
+
 
         // {
         //     foreach ($feedbacks_questions as $feedbacks_question) {
@@ -92,7 +114,6 @@ class FeedbackController extends Controller
         // Schedule::$mentor_details = true;
 
 
-        // return
         $appointment = Appointment::with('assign_mentor')->find($request->appointment_id);
         // $mentors = [];
         // foreach($appointment->schedule->mentors ?? [] as $type)
@@ -119,7 +140,7 @@ class FeedbackController extends Controller
         // }
         return [
             'appointment_id'    => $request->appointment_id,
-            'user_id'           => $request->user_id,
+            'user_id'           => $user_id,
             'questions'         => $questions ?? []
         ];
     }
@@ -133,13 +154,14 @@ class FeedbackController extends Controller
     public function store(Request $request)
     {
         //
-        // return $request;
+        // return $request->form_data['appointment_id'];
+        // return json_encode($request->rating);
         $feedback = Feedback::create([
-            'fq_id' => (int)($request->id),
-            'appointment_id' => $request->appointment_id,
+            'fq_id' => (int)$request->form_data['fq_id'],
+            'appointment_id' => $request->form_data['appointment_id'],
             'mentor_id' => $request->mentor_id ?? Null,
-            'ratings' => $request->ratings,
-            'note' => $request->note,
+            'ratings' => $request->rating,
+            'note' => $request->form_data['note'],
         ]);
 
         if ($feedback) {

@@ -27,6 +27,10 @@ class Feedback extends Model
     {
         return $this->belongsTo(FeedbackQuestion::class, 'fq_id', 'id');
     }
+    public function appointments()
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id', 'id');
+    }
 
     // public function getRatingsAttribute($value)
     // {
@@ -34,9 +38,9 @@ class Feedback extends Model
     //     return $ratings;
     // }
 
-    public function setRatingsAttribute($value)
-    {
-        $ratings = json_encode($value);
-        $this->attributes['ratings'] = $ratings;
-    }
+    // public function setRatingsAttribute($value)
+    // {
+    //     $ratings = json_encode($value);
+    //     $this->attributes['ratings'] = $ratings;
+    // }
 }
