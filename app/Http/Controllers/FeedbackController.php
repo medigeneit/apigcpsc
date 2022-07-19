@@ -41,46 +41,46 @@ class FeedbackController extends Controller
             ->get();
             
             
-            $feedback_rettings = [1, 2, 3, 4, 5];
+            $feedback_ratings = [1, 2, 3, 4, 5];
             $data = []; {
                 foreach ($feedbacks_questions as $feedbacks_question) {
                     $data['count'] = 0;
                     $data['questions'] =  $feedbacks_question->questions;
                     
                     foreach ($feedbacks_question->questions as $key => $question) {
-                        foreach ($feedback_rettings as $retting) {
-                            $data['question_rettings'][$key][$retting] = 0;
+                        foreach ($feedback_ratings as $retting) {
+                            $data['question_ratings'][$key][$retting] = 0;
                     }
                 }
                 $feedback_array = $feedbacks_question->feedbacks;
                 foreach ($feedback_array as $feedback) {
                     $data['count'] += 1;
                     foreach ($feedback->ratings as $key => $ret) {
-                        $data['question_rettings'][$key][$ret] += 1;
+                        $data['question_ratings'][$key][$ret] += 1;
                     }
                 }
             }
         }
         
         
-        $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id');
+        // $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id');
         
         
-        $overall_retings = $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id')->map(function($group_feedbacks, $key){
-            $overall_feedback =[];
-            $overall_feedback = $group_feedbacks[0]->appointments->mentor_feedbacks->mentor;
-            $overall_feedback ['ratings']= $group_feedbacks->pluck('ratings');
-            $overall_feedback ['avg_ratings'] = array_filter($overall_feedback ['rettings'],function($query){
+        // $overall_ratings = $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id')->map(function($group_feedbacks, $key){
+        //     $overall_feedback =[];
+        //     $overall_feedback = $group_feedbacks[0]->appointments->mentor_feedbacks->mentor;
+        //     $overall_feedback ['ratings']= $group_feedbacks->pluck('ratings');
+        //     $overall_feedback ['avg_ratings'] = array_filter($overall_feedback ['ratings'],function($query){
 
-            });
-            return  $overall_feedback ;
-        });
-        return $overall_retings->values() ;
+        //     });
+        //     return  $overall_feedback ;
+        // });
+        // return $overall_ratings->values() ;
         // $feedbacks_questions->feedbacks->map(function($feedback))
 
         // FeedbackResource::collection($feedbacks_questions);
 
-        return  [$data, $feedbacks_questions];
+        return  $data;
 
 
         // {
