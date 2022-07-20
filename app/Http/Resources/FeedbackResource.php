@@ -18,13 +18,9 @@ class FeedbackResource extends JsonResource
 
         $data['id'] = $this->id;
         $data['type'] = $this->type;
-        $data['ratings'] = $this->id;
-        $data['id'] = $this->id;
-        $data['id'] = $this->id;
-        $data['id'] = $this->id;
-        $data['id'] = $this->id;
-        $data['id'] = $this->id;
-        $data['id'] = $this->id;
-        return ;
+        $data['questions'] = $this->questions;
+        $data['user_ratings'] = UserRatingsRatioResource::collection($this->user_ratings);
+        $data['rating_ratio'] = $this->rating_ratio;
+        return $data;
     }
 }

@@ -34,6 +34,17 @@ class FeedbackQuestion extends Model
     {
         return $this->hasmany(Feedback::class, 'fq_id', 'id');
     }
+
+    public function user_ratings()
+    {
+        return $this->hasmany(Rating::class, 'fq_id', 'id');
+    }
+    public function rating_ratio()
+    {
+        return $this->hasmany(RatingRatio::class, 'fq_id', 'id');
+    }
+
+
     // public function getQuestionsRettingAttribute(Type $var = null)
     // {
     //     $rettings = [];
@@ -43,5 +54,5 @@ class FeedbackQuestion extends Model
     //     $this->feedbacks
     // }
 
-    
+
 }

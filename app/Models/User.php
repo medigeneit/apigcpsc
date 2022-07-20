@@ -99,4 +99,9 @@ class User extends Authenticatable
     {
         return $this->createToken(request()->ip())->plainTextToken;
     }
+
+    public function user_ratings()
+    {
+        return $this->hasmany(Rating::class, 'fq_id', 'id');
+    }
 }
