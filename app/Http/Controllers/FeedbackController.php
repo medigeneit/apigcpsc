@@ -118,7 +118,7 @@ class FeedbackController extends Controller
     {
 
 
-        return $feedbacks_question = FeedbackQuestion::with('rating_ratio')->find($request->form_data['fq_id']);
+        // return $feedbacks_question = FeedbackQuestion::with('rating_ratio')->find($request->form_data['fq_id']);
         // return $request;
         // return $request->form_data['appointment_id'];
         // return json_encode($request->rating);
@@ -146,7 +146,7 @@ class FeedbackController extends Controller
             $sum_ratings =  $all_rating->sum_ratings;
             $count =  $all_rating->count+1;
 
-            foreach (json_decode($request->rating) as $key => $rating) {
+            foreach (($request->rating) as $key => $rating) {
                 $sum_ratings[$key] += $rating;
             }
             $all_rating->update([
@@ -168,7 +168,7 @@ class FeedbackController extends Controller
         if($feedbacks_question->rating_ratio->isEmpty()){
             foreach ($feedbacks_question->questions as $key => $question) {
                 // $model_rating[$key] =  0;
-                $rat_key =json_decode($request->rating)[$key];
+                $rat_key = $request->rating[$key];
                 // return[json_decode($request->rating),$rat_key];
                 // return gettype($key);
                 $data[] = RatingRatio::create([
@@ -182,7 +182,7 @@ class FeedbackController extends Controller
             // return $feedbacks_question;
             foreach ($feedbacks_question->questions as $key => $question) {
                 // $model_rating[$key] =  0;
-                $rat_key =json_decode($request->rating)[$key];
+                $rat_key =$request->rating[$key];
                 $updated_rating_ratio = $rating_ratio->where('question_key', $key)->first()->{"$rat_key".'_star'} + 1;
                 $rating_ratio->where('question_key', $key)->first()->update([
                     "$rat_key".'_star' => $updated_rating_ratio

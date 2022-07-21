@@ -66,7 +66,6 @@ class AppointmentController extends Controller
             $schedule = $schedule->where('id', $request->schedule_id)
             ->first();
 
-
             // return $schedule->appointments->whereNotNull('requested_mentor_id');
 
             $grouped = $schedule->appointments->whereNotNull('requested_mentor_id')->groupBy('requested_mentor_id')->map(function ($row) {
@@ -115,7 +114,8 @@ class AppointmentController extends Controller
                 'expected_mentors_frequescy' => $expected_mentors_frequescy,
                 'data' => LastAppointmentResource::collection($schedule->appointments),
                 // 'data2' => $schedule->appointments,
-                'mentors' =>   $roles->pluck('users', 'id')
+                'mentors' =>   $roles->pluck('users', 'id'),
+                'schedule' => $schedule->date
             ];
         }
     }
