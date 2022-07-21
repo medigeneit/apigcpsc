@@ -13,9 +13,9 @@ class Feedback extends Model
     protected $guarded = [];
 
 
-    protected $casts = [
-        'ratings' => 'json'
-    ];
+    // protected $casts = [
+    //     'ratings' => 'json'
+    // ];
 
     public function mentor()
     {

@@ -6,6 +6,8 @@ use App\Http\Resources\FeedbackResource;
 use App\Models\Appointment;
 use App\Models\Feedback;
 use App\Models\FeedbackQuestion;
+use App\Models\Rating;
+use App\Models\RatingRatio;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Database\Query\Builder;
@@ -24,82 +26,43 @@ class FeedbackController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    //  private function FunctionName(Request $request, $feedbacks)
+    //  {
+    //     if($request->type == 1){
+    //         return
+    //         $feedbacks_questions[0]->feedbacks->groupBy('appointments.user_id');
+
+    //     }elseif($request->type == 0){
+    //         return
+    //         $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id');
+
+    //     }
+    //  }
+
+
+
     public function index(Request $request)
     {
         //
-
-        // return   
-        $feedbacks_questions = FeedbackQuestion::with('feedbacks')
-            ->where('type', $request->type)
-            ->when($request->type == 1, function ($query) {
-                $query->with('feedbacks:id,fq_id,ratings,appointment_id', 'feedbacks.appointments.patient');
-            })
-            ->when($request->type == 0, function ($query) {
-                $query->with('feedbacks:id,fq_id,ratings,appointment_id', 'feedbacks.appointments.mentor_feedbacks.mentor');
-            })
-            ->latest()
-            ->get();
-            
-            
-            $feedback_ratings = [1, 2, 3, 4, 5];
-            $data = []; {
-                foreach ($feedbacks_questions as $feedbacks_question) {
-                    $data['count'] = 0;
-                    $data['questions'] =  $feedbacks_question->questions;
-                    
-                    foreach ($feedbacks_question->questions as $key => $question) {
-                        foreach ($feedback_ratings as $retting) {
-                            $data['question_ratings'][$key][$retting] = 0;
-                    }
-                }
-                $feedback_array = $feedbacks_question->feedbacks;
-                foreach ($feedback_array as $feedback) {
-                    $data['count'] += 1;
-                    foreach ($feedback->ratings as $key => $ret) {
-                        $data['question_ratings'][$key][$ret] += 1;
-                    }
-                }
-            }
+        if(!$request->has('type')){
+            return [
+                'message' => "Please select any feedback type",
+                'success' => false
+            ];
         }
-        
-        
-        // $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id');
-        
-        
-        // $overall_ratings = $feedbacks_questions[0]->feedbacks->groupBy('appointments.mentor_feedbacks.mentor_id')->map(function($group_feedbacks, $key){
-        //     $overall_feedback =[];
-        //     $overall_feedback = $group_feedbacks[0]->appointments->mentor_feedbacks->mentor;
-        //     $overall_feedback ['ratings']= $group_feedbacks->pluck('ratings');
-        //     $overall_feedback ['avg_ratings'] = array_filter($overall_feedback ['ratings'],function($query){
 
-        //     });
-        //     return  $overall_feedback ;
-        // });
-        // return $overall_ratings->values() ;
-        // $feedbacks_questions->feedbacks->map(function($feedback))
+        $feedbacks_questions = FeedbackQuestion::with('user_ratings.user:id,name,phone,gender','rating_ratio')
+        ->where('type', $request->type)
+        ->latest()
+        ->paginate(1);
 
-        // FeedbackResource::collection($feedbacks_questions);
-
-        return  $data;
+        return
+        FeedbackResource::collection($feedbacks_questions);
 
 
-        // {
-        //     foreach ($feedbacks_questions as $feedbacks_question) {
-        //         $feedback_array = $feedbacks_question->feedbacks->pluck('ratings')->toArray();
-        //         $data['questions'] =  $feedbacks_question->questions;
-        //         $data['question_rettings'] =  [];
-        //         foreach ($feedbacks_question->questions as $feedback_position => $question) {
-        //             foreach ($feedback_rettings as $feedback_value) {
 
-        //                 $data['question_rettings'][$feedback_position][$feedback_value] = count(array_filter($feedback_array, function ($ratings) use ($feedback_position, $feedback_value) {
-        //                     return $ratings[$feedback_position] == $feedback_value;
-        //                 }));
-        //             }
-        //         }
-        //     }
-        // }
-
-        return $data;
+         
     }
 
 
@@ -153,8 +116,10 @@ class FeedbackController extends Controller
      */
     public function store(Request $request)
     {
-        // return $request->form_data['appointment_id'];
-        //
+
+
+        return $feedbacks_question = FeedbackQuestion::with('rating_ratio')->find($request->form_data['fq_id']);
+        // return $request;
         // return $request->form_data['appointment_id'];
         // return json_encode($request->rating);
         $feedback = Feedback::create([
@@ -164,6 +129,67 @@ class FeedbackController extends Controller
             'ratings' => $request->rating,
             'note' => $request->form_data['note'],
         ]);
+
+
+        if ($request->mentor_id) {
+            $user_id = Appointment::find($request->form_data['appointment_id'])->patient->id;
+        } else {
+            $user_id = Appointment::find($request->form_data['appointment_id'])->mentor->id;
+        }
+
+        $all_rating = Rating::where([
+            'fq_id' => (int)$request->form_data['fq_id'],
+            'user_id' => $user_id
+        ])->first();
+
+        if ($all_rating) {
+            $sum_ratings =  $all_rating->sum_ratings;
+            $count =  $all_rating->count+1;
+
+            foreach (json_decode($request->rating) as $key => $rating) {
+                $sum_ratings[$key] += $rating;
+            }
+            $all_rating->update([
+                'sum_ratings' => $sum_ratings,
+                'count' => $count
+            ]);
+        } else {
+            Rating::create([
+                'fq_id' => $request->form_data['fq_id'],
+                'user_id' => $user_id,
+                'sum_ratings' => $request->rating,
+                'count' => $count =  1
+            ]);
+        }
+
+        $feedbacks_question = FeedbackQuestion::with('rating_ratio')->find($request->form_data['fq_id']);
+        $rating_ratio =  $feedbacks_question->rating_ratio;
+        $data=[];
+        if($feedbacks_question->rating_ratio->isEmpty()){
+            foreach ($feedbacks_question->questions as $key => $question) {
+                // $model_rating[$key] =  0;
+                $rat_key =json_decode($request->rating)[$key];
+                // return[json_decode($request->rating),$rat_key];
+                // return gettype($key);
+                $data[] = RatingRatio::create([
+                    'fq_id' => $request->form_data['fq_id'],
+                    'question_key' => $key,
+                    "$rat_key".'_star' => 1,
+                ]);
+            }
+            // return ($data);
+        }else{
+            // return $feedbacks_question;
+            foreach ($feedbacks_question->questions as $key => $question) {
+                // $model_rating[$key] =  0;
+                $rat_key =json_decode($request->rating)[$key];
+                $updated_rating_ratio = $rating_ratio->where('question_key', $key)->first()->{"$rat_key".'_star'} + 1;
+                $rating_ratio->where('question_key', $key)->first()->update([
+                    "$rat_key".'_star' => $updated_rating_ratio
+                ]);
+            }
+        }
+
 
         if ($feedback) {
             return [
