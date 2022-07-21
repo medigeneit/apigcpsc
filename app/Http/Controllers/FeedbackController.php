@@ -113,15 +113,15 @@ class FeedbackController extends Controller
         //
         // Schedule::$mentor_details = true;
 
-
         $appointment = Appointment::with('assign_mentor')->find($request->appointment_id);
+        
         // $mentors = [];
         // foreach($appointment->schedule->mentors ?? [] as $type)
         // {
         //     $mentors [] = $type;
         // }
         $user_id = $request->user()->id;
-
+        
         // if (in_array($user_id, Arr::collapse($mentors))) {
         if ($user_id == ($appointment->assign_mentor->mentor_id ?? 0)) {
 
@@ -153,13 +153,14 @@ class FeedbackController extends Controller
      */
     public function store(Request $request)
     {
+        // return $request->form_data['appointment_id'];
         //
         // return $request->form_data['appointment_id'];
         // return json_encode($request->rating);
         $feedback = Feedback::create([
             'fq_id' => (int)$request->form_data['fq_id'],
             'appointment_id' => $request->form_data['appointment_id'],
-            'mentor_id' => $request->mentor_id ?? Null,
+            'mentor_id' => $request->form_data['user_id'] ?? Null,
             'ratings' => $request->rating,
             'note' => $request->form_data['note'],
         ]);

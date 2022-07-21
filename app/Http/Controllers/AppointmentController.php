@@ -6,6 +6,7 @@ use App\Http\Resources\LastAppointmentResource;
 use App\Http\Resources\ShowFeedbackResource;
 use App\Http\Resources\UserResource;
 use App\Models\Appointment;
+use App\Models\Feedback;
 use App\Models\MentorAssign;
 use App\Models\Role;
 use App\Models\Schedule;
@@ -39,6 +40,7 @@ class AppointmentController extends Controller
             $schedule = Schedule::query();
 
             // if ($support_type) {
+        
             $schedule = $schedule->with([
                 'appointments' => function ($q) use ($support_type, $mentor, $user) {
                     $q->when($support_type, function ($q) use ($support_type) {
@@ -53,6 +55,7 @@ class AppointmentController extends Controller
                 },
                 'appointments.patient',
                 'appointments.requested_mentor',
+                'appointments.mentor',
                 'appointments.assign_mentor.user:id,name'
             ]);
             // }
@@ -61,7 +64,7 @@ class AppointmentController extends Controller
             // }
             // return
             $schedule = $schedule->where('id', $request->schedule_id)
-                ->first();
+            ->first();
 
 
             // return $schedule->appointments->whereNotNull('requested_mentor_id');
@@ -104,7 +107,6 @@ class AppointmentController extends Controller
             //     $mentor_list[$type] =>
 
             // })
-
 
             LastAppointmentResource::$types =  Role::where('type', 2)->pluck('name', 'id');
 

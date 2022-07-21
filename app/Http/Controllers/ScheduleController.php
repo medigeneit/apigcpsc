@@ -7,6 +7,7 @@ use App\Http\Resources\ScheduleResource;
 use App\Models\Appointment;
 use App\Models\Chamber;
 use App\Models\Feedback;
+use App\Models\MentorAssign;
 use App\Models\Role;
 use App\Models\Schedule;
 use App\Models\User;
@@ -629,24 +630,26 @@ class ScheduleController extends Controller
     public function mentor_schedule(Request $request)
     {
         // $user_id = 2;
+        // return MentorAssign::with('user', 'type', 'appointment.patient:id,name', 'appointment.schedule')->where('mentor_id', $request->user_id)->get();
+
+
         $user_id = $request->user()->id ?? NULL;
 
-
         $chamber_id = $request->chamber_id;
-
+        
         $mentor = User::where('id', $user_id)->with('roles:id,name')->first();
-
+        
         User::where('id', 2)->first()->getRoleNames();
-
+        
         $support_types = Role::query()
-            // ->with('users')
-            ->where('type', 2)
-            // ->get();
-            ->pluck('name', 'id');
-        // return
+        // ->with('users')
+        ->where('type', 2)
+        // ->get();
+        ->pluck('name', 'id');
         $chembers = Chamber::get(['id', 'name', 'address']);
-
-        // return 313;
+        
+        // return 
+        // return
         $schedules = Schedule::query()
             ->with([
                 'appointments' => function ($q) use ($mentor, $request) {
@@ -672,6 +675,7 @@ class ScheduleController extends Controller
             ->when($chamber_id, function ($query, $chamber_id) {
                 return $query->where('chamber_id', $chamber_id);
             });
+            // return $schedules->get();
 
 
         // return $schedules->get();
@@ -711,7 +715,6 @@ class ScheduleController extends Controller
             'support_types' => $support_types,
             'chembers' => $chembers,
             'schedules' => mentorScheduleResource::collection($schedules),
-            'query_log' => DB::getQueryLog()
         ];
     }
 }

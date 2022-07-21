@@ -21,7 +21,6 @@ class MentorAssignController extends Controller
 
     public function index()
     {
-        // return 234;
         return MentorAssign::with('user', 'type', 'appointment.patient:id,name')->get();
         // return view('admin.roles.data', compact('roles'));
     }
